@@ -109,23 +109,23 @@ servings | positive numbers | how many servings of each food
 ## Relational Schema in 3NF
 
 ### Entities 
-**UserAccounts**(<ins>username</ins>, password, first_name, last_name) 
+**UserAccounts**(<ins>id</ins>, username, password, first_name, last_name) 
 
-**WorkoutTypes**(<ins>description</ins>) 
+**WorkoutTypes**(<ins>id</ins>, description) 
 
-**Nutrients**(<ins>name</ins>, rdv_amount, rdv_unit) 
+**Nutrients**(<ins>id</ins>, name, rdv_amount, rdv_unit) 
 
-**FoodsBeverages**(<ins>name</ins>, calories_per_serving, serving_size_grams, serving_size_cc, serving_size_units, serving_size_label) 
+**FoodsBeverages**(<ins>id</ins>, type, name, calories_per_serving, serving_size_grams, serving_size_cc, serving_size_units, serving_size_label) 
 
 ### Relationships
 
-**ContainsNutrients**(<ins>food name&dagger;, nutrient name&dagger;</ins>, amount) 
+**ContainsNutrients**(<ins>food_id&dagger;, nutrient_id&dagger;</ins>, amount) 
 
-**RecordsWeight**(<ins>date, username&dagger;</ins>, weight_kg) 
+**RecordsWeight**(<ins>date, user_id&dagger;</ins>, weight_kg) 
 
-**DoesWorkout**(<ins>date, username&dagger;, workout description&dagger;</ins>, duration, intensity) 
+**DoesWorkout**(<ins>date, user_id&dagger;, workout_id&dagger;</ins>, duration, intensity) 
 
-**Eats**(<ins>date, username&dagger;, food name&dagger;</ins>, servings) 
+**Eats**(<ins>date, user_id&dagger;, food_id&dagger;</ins>, servings) 
 
 ## SQL Scripts
 * [Create Tables](https://github.com/466-mysequel/fitnesstracker/blob/master/sql/tables.sql?raw=true)
