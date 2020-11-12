@@ -43,6 +43,7 @@ The data base needs to be able to store its operational data in such a way that 
 #### User Accounts
 Attribute | Domain | Description
 -- | -- | --
+id | positive integers | surrogate key
 username | any utf8 characters | login name
 password | any utf8 characters | encrypted password
 first_name | any utf8 characters | given name
@@ -51,11 +52,13 @@ last_name | any utf8 characters | surname
 #### Workout Types
 Attribute | Domain | Description
 -- | -- | --
+id | positive integers | surrogate key
 description | any utf8 characters | workout activity
 
 #### Nutrients
 Attribute | Domain | Description
 -- | -- | --
+id | positive integers | surrogate key
 name | any utf8 characters | nutrient name
 rdv_amount | positive numbers | recommended daily intake
 rdv_unit | 'g', 'mg', 'mcg' | unit of measure
@@ -63,6 +66,8 @@ rdv_unit | 'g', 'mg', 'mcg' | unit of measure
 #### Foods & Beverages
 Attribute | Domain | Description
 -- | -- | --
+id | positive integers | surrogate key
+type | 'solid', 'liquid' | solid food or beverage
 name | any utf8 characters | name of food
 calories_per_serving | positive integers | kiloCalories per serving
 serving_size_units | positive numbers | serving size in preferred unit
