@@ -1,0 +1,40 @@
+# Project
+
+## Secrets
+config/config.php
+
+## Misc
+
+### Archives
+*.tar.gz
+*.zip
+### Binary files
+*.pdf
+*.png
+
+## OS Junk files
+
+### Windows
+Thumbs.db
+ethumbs.db
+desktop.ini
+
+### Linux
+*~
+.Trash-*
+
+### MacOS
+.DS_Store
+._*
+.Trashes
+
+### Backups
+*.bak
+*.swp
+*.tmp
+
+## Editors
+### VSCode
+.vscode/*
+*.code-workspace
+.history/
