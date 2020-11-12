@@ -43,6 +43,7 @@ The data base needs to be able to store its operational data in such a way that 
 #### User Accounts
 Attribute | Domain | Description
 -- | -- | --
+id | positive integers | surrogate key
 username | any utf8 characters | login name
 password | any utf8 characters | encrypted password
 first_name | any utf8 characters | given name
@@ -51,11 +52,13 @@ last_name | any utf8 characters | surname
 #### Workout Types
 Attribute | Domain | Description
 -- | -- | --
+id | positive integers | surrogate key
 description | any utf8 characters | workout activity
 
 #### Nutrients
 Attribute | Domain | Description
 -- | -- | --
+id | positive integers | surrogate key
 name | any utf8 characters | nutrient name
 rdv_amount | positive numbers | recommended daily intake
 rdv_unit | 'g', 'mg', 'mcg' | unit of measure
@@ -63,6 +66,8 @@ rdv_unit | 'g', 'mg', 'mcg' | unit of measure
 #### Foods & Beverages
 Attribute | Domain | Description
 -- | -- | --
+id | positive integers | surrogate key
+type | 'solid', 'liquid' | solid food or beverage
 name | any utf8 characters | name of food
 calories_per_serving | positive integers | kiloCalories per serving
 serving_size_units | positive numbers | serving size in preferred unit
@@ -104,23 +109,23 @@ servings | positive numbers | how many servings of each food
 ## Relational Schema in 3NF
 
 ### Entities 
-**UserAccounts**(<ins>username</ins>, password, first_name, last_name) 
+**UserAccounts**(<ins>id</ins>, username, password, first_name, last_name) 
 
-**WorkoutTypes**(<ins>description</ins>) 
+**WorkoutTypes**(<ins>id</ins>, description) 
 
-**Nutrients**(<ins>name</ins>, rdv_amount, rdv_unit) 
+**Nutrients**(<ins>id</ins>, name, rdv_amount, rdv_unit) 
 
-**FoodsBeverages**(<ins>name</ins>, calories_per_serving, serving_size_grams, serving_size_cc, serving_size_units, serving_size_label) 
+**FoodsBeverages**(<ins>id</ins>, type, name, calories_per_serving, serving_size_grams, serving_size_cc, serving_size_units, serving_size_label) 
 
 ### Relationships
 
-**ContainsNutrients**(<ins>food name&dagger;, nutrient name&dagger;</ins>, amount) 
+**ContainsNutrients**(<ins>food_id&dagger;, nutrient_id&dagger;</ins>, amount) 
 
-**RecordsWeight**(<ins>date, username&dagger;</ins>, weight_kg) 
+**RecordsWeight**(<ins>date, user_id&dagger;</ins>, weight_kg) 
 
-**DoesWorkout**(<ins>date, username&dagger;, workout description&dagger;</ins>, duration, intensity) 
+**DoesWorkout**(<ins>date, user_id&dagger;, workout_id&dagger;</ins>, duration, intensity) 
 
-**Eats**(<ins>date, username&dagger;, food name&dagger;</ins>, servings) 
+**Eats**(<ins>date, user_id&dagger;, food_id&dagger;</ins>, servings) 
 
 ## SQL Scripts
 * [Create Tables](https://github.com/466-mysequel/fitnesstracker/blob/master/sql/tables.sql?raw=true)
