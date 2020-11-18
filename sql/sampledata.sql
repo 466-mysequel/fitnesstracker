@@ -48,4 +48,14 @@ INSERT INTO nutrient (name, rdv_amount, rdv_unit) VALUES
     ('Iron',                 10, 'mg'),
     ('Trans Fat',             2, 'g'),
     ('Betaine',             500, 'mg');
-
+INSERT INTO food(id,type,name,calories_per_serving,serving_size_friendly,serving_size_grams,serving_size_cc) VALUES
+    (1,'solid','large egg',83,'one egg',53,53),
+    (2,'solid','swiss cheese',72,'one slice of cheese',28,22),
+    (3,'solid','one slice tomato',4,'one slice of tomato',19,19),
+    (4,'solid','full tomato',30,'full tomato',85,79),
+    (5,'solid','bread',75,'one slice of bread',28,147),
+    (6,'liquid','Chik-Fil-A Chocolate Milkshake (small)',610,'14 oz',404,414.029),
+    (7,'liquid','Chik-Fil-A Chocolate Milkshake (large)',770,'20 oz',515,591.471),
+    (8,'solid','Wendy''s Small Vanilla Frosty',340,'12 oz',340.195,354.882),
+    (9,'solid','Lette Caramel Macaron',90,'one macaron piece',21,21),
+    (10,'solid','Chocolate Pocky Sticks',150,'13 sticks',30,30);
