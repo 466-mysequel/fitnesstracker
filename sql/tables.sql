@@ -1,5 +1,5 @@
 # Cleanup: 
-DROP TABLE IF EXISTS food_log,workout_log,weight_log,nutrition_content,food,nutrient,workout_type,user;
+DROP TABLE IF EXISTS food_log,workout_log,weight_log,macronutrient_content,micronutrient_content,food,nutrient,workout_type,user;
 # Entities: 
 CREATE TABLE user (
     id INT AUTO_INCREMENT PRIMARY KEY,
