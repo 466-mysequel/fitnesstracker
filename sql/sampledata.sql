@@ -48,6 +48,8 @@ INSERT INTO nutrient (name, rdv_amount, rdv_unit) VALUES
     ('Iron',                 10, 'mg'),
     ('Trans Fat',             2, 'g'),
     ('Betaine',             500, 'mg');
+
+# Foods
 INSERT INTO food(id,type,name,calories_per_serving,serving_size_friendly,serving_size_grams,serving_size_cc) VALUES
     (1,'solid','large egg',83,'one egg',53,53),
     (2,'solid','swiss cheese',72,'one slice of cheese',28,22),
@@ -59,3 +61,21 @@ INSERT INTO food(id,type,name,calories_per_serving,serving_size_friendly,serving
     (8,'solid','Wendy''s Small Vanilla Frosty',340,'12 oz',340.195,354.882),
     (9,'solid','Lette Caramel Macaron',90,'one macaron piece',21,21),
     (10,'solid','Chocolate Pocky Sticks',150,'13 sticks',30,30);
+
+# Workout Logs
+INSERT INTO workout_log(date,user_id,workout_type_id,duration_secs) VALUES
+    ('1602342600',1,1,3600),
+    ('1570728600',2,3,1800),
+    ('1599780600',3,2,5400),
+    ('1602459000',4,16,5400),
+    ('1597182300',5,5,1800),
+    ('1602952200',1,278,3600),
+    ('1605648600',3,134,5400),
+    ('1604098800',4,17,1800),
+    ('1602766800',1,35,4500),
+    ('1600218000',2,29,3600),
+    ('1600178400',3,91,10800),
+    ('1599782400',4,68,3600),
+    ('1599696000',2,69,3600),
+    ('1602288000',5,64,4500),
+    ('1602460800',5,65,4500); 
