@@ -70,6 +70,7 @@ rdv_unit | 'g', 'mg', 'mcg' | unit of measure
 
 #### Foods & Beverages
 Attribute | Domain | Description
+-- | -- | --
 id | positive integers | surrograte key
 type | 'solid','liquid' | food or beverage?
 name | any utf8 characters | name of food
