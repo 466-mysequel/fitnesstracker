@@ -135,6 +135,8 @@ servings | positive numbers | how many servings of each food
 
 **Eats**(<ins>date, user_id&dagger;, food_id&dagger;</ins>, servings) 
 
+[Relational Schema in 3NF PDF](docs/schema_3nf.pdf)
+
 ## SQL Scripts
 * [Create Tables](sql/tables.sql)
 * [Insert Sample Data](sql/sampledata.sql)
