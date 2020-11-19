@@ -32,9 +32,9 @@ The data base needs to be able to store its operational data in such a way that 
 * You must implement a page showing workouts over a given time period, including estimated calories burned, and any other relevant information, for each workout. Statistics such as total calories and average calories per workout should be displayed on this page as well.
 
 ## ER Diagram
-![ER Diagram](https://github.com/466-mysequel/fitnesstracker/blob/master/docs/erd.png?raw=true)
+![ER Diagram](docs/erd.png)
 
-[ER Diagram PDF](https://github.com/466-mysequel/fitnesstracker/blob/master/docs/erd.pdf?raw=true)
+[ER Diagram PDF](docs/erd.pdf)
 
 ## ER Diagram Description
 
@@ -52,8 +52,13 @@ last_name | any utf8 characters | surname
 #### Workout Types
 Attribute | Domain | Description
 -- | -- | --
-id | positive integers | surrogate key
-description | any utf8 characters | workout activity
+id | positive integers | surrogate key
+mets_code | positive integers | metabolic equivalent code
+mets_value | 1.0 to 99.9 | metabolic equivalent value
+category | any utf8 characters | activity category
+activity | any utf8 characters | activity
+intensity | any utf8 characters | activity intensity
+description | any utf8 characters | activity description
 
 #### Nutrients
 Attribute | Domain | Description
@@ -65,22 +70,25 @@ rdv_unit | 'g', 'mg', 'mcg' | unit of measure
 
 #### Foods & Beverages
 Attribute | Domain | Description
--- | -- | --
-id | positive integers | surrogate key
-type | 'solid', 'liquid' | solid food or beverage
+id | positive integers | surrograte key
+type | 'solid','liquid' | food or beverage?
 name | any utf8 characters | name of food
 calories_per_serving | positive integers | kiloCalories per serving
-serving_size_units | positive numbers | serving size in preferred unit
-serving_size_label | any utf8 characters | non-metric unit label
+serving_size_friendly | any utf8 characters | serving size in non-metric units
 serving_size_grams | positive integers | serving size mass (grams)
 serving_size_cc | positive integers | serving size volume (cc/mL)
 
 ### Relationships
 
-#### Nutrition Content
+#### Micronutrient Content
 Attribute | Domain | Description
 -- | -- | --
-amount | positive numbers | how much of the nutrient
+percent_dv | positive integers | how much of the nutrient (percent daily value)
+
+#### Macronutrient Content
+Attribute | Domain | Description
+-- | -- | --
+amount | positive numbers | how much of the nutrient (mass)
 
 #### Records Weight
 Attribute | Domain | Description
@@ -91,7 +99,6 @@ weight | positive numbers | weight
 Attribute | Domain | Description
 -- | -- | --
 duration | positive time | how long
-intensity | any utf8 characters | what level of intensity
 
 #### Eats
 Attribute | Domain | Description
@@ -100,18 +107,18 @@ servings | positive numbers | how many servings of each food
 
 ### Assumptions & Notes
 * User account passwords will actually be encrypted hashes, rather than plaintext passwords.
-* Macronutrients and Micronutrients can both be stored in the same nutrients table. Recommended daily value percentages can be calculated by dividing the mass of any nutrient in a food by that nutrient's RDV amount.
+* Macronutrients and Micronutrients can both be stored in the same nutrients table, but are stored in different tables for convenience. Recommended daily value percentages can be calculated by dividing the mass of any nutrient in a food by that nutrient's RDV amount.
 * Users can specify their preferred unit of any food, eg. "half cup", "one egg", "sleeve of cookies", but they will also have to specify the serving size in mass/volume units that can be converted to metric.
 * The number of servings that a user has eaten can optionally be calculated by dividing the mass or volume of the eaten food by the mass or volume of the standard serving size.
 
-[ER Diagram Description PDF](https://github.com/466-mysequel/fitnesstracker/blob/master/docs/erd_description.pdf?raw=true)
+[ER Diagram Description PDF](docs/erd_description.pdf)
 
 ## Relational Schema in 3NF
 
 ### Entities 
 **UserAccounts**(<ins>id</ins>, username, password, first_name, last_name) 
 
-**WorkoutTypes**(<ins>id</ins>, description) 
+**WorkoutTypes**(<ins>id</ins>, mets_code, mets_value, category, activity, intensity, description) 
 
 **Nutrients**(<ins>id</ins>, name, rdv_amount, rdv_unit) 
 
@@ -123,13 +130,13 @@ servings | positive numbers | how many servings of each food
 
 **RecordsWeight**(<ins>date, user_id&dagger;</ins>, weight_kg) 
 
-**DoesWorkout**(<ins>date, user_id&dagger;, workout_id&dagger;</ins>, duration, intensity) 
+**DoesWorkout**(<ins>date, user_id&dagger;, workout_id&dagger;</ins>, duration) 
 
 **Eats**(<ins>date, user_id&dagger;, food_id&dagger;</ins>, servings) 
 
 ## SQL Scripts
-* [Create Tables](https://github.com/466-mysequel/fitnesstracker/blob/master/sql/tables.sql?raw=true)
-* [Insert Sample Data](https://github.com/466-mysequel/fitnesstracker/blob/master/sql/data.sql?raw=true)
+* [Create Tables](sql/tables.sql)
+* [Insert Sample Data](sql/sampledata.sql)
 
 ## Download
 **From the latest release as a zip:**
