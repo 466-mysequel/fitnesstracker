@@ -15,7 +15,8 @@ CREATE TABLE workout_type (
     category VARCHAR(191) NOT NULL,
     activity VARCHAR(191) NOT NULL,
     intensity VARCHAR(191) NOT NULL,
-    description VARCHAR(191) UNIQUE NOT NULL # limit on unique columns is floor(767/4)=191
+    description VARCHAR(191) NOT NULL, # limit on unique columns is floor(767/4)=191
+    UNIQUE KEY (category,description)
 );
 CREATE TABLE nutrient (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -61,7 +62,6 @@ CREATE TABLE workout_log (
     user_id INT,
     workout_type_id INT,
     duration_seconds INT NOT NULL,
-    intensity VARCHAR(255), # What are the possible values for this? Low, Medium, High?
     PRIMARY KEY (date, user_id, workout_type_id),
     FOREIGN KEY (user_id) REFERENCES user(id),
     FOREIGN KEY (workout_type_id) REFERENCES workout_type(id)
