@@ -11,12 +11,12 @@ CREATE TABLE user (
 CREATE TABLE workout_type (
     id INT AUTO_INCREMENT PRIMARY KEY,
     mets_code INT UNIQUE NULL,
-    mets_value DECIMAL(2,1) NOT NULL,
+    mets_value DECIMAL(4,2) NOT NULL,
     category VARCHAR(191) NOT NULL,
     activity VARCHAR(191) NOT NULL,
     intensity VARCHAR(191) NOT NULL,
-    description VARCHAR(191) NOT NULL, # limit on unique columns is floor(767/4)=191
-    UNIQUE KEY (category,description)
+    description VARCHAR(255) NOT NULL,
+    UNIQUE KEY (category,activity,intensity)
 );
 CREATE TABLE nutrient (
     id INT AUTO_INCREMENT PRIMARY KEY,
