@@ -1,5 +1,5 @@
 # Cleanup: 
-DROP TABLE IF EXISTS food_log,workout_log,weight_log,nutrition_content,food,nutrient,workout_type,user;
+DROP TABLE IF EXISTS food_log,workout_log,weight_log,macronutrient_content,micronutrient_content,food,nutrient,workout_type,user;
 # Entities: 
 CREATE TABLE user (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -11,11 +11,12 @@ CREATE TABLE user (
 CREATE TABLE workout_type (
     id INT AUTO_INCREMENT PRIMARY KEY,
     mets_code INT UNIQUE NULL,
-    mets_value DECIMAL(2,1) NOT NULL,
+    mets_value DECIMAL(4,2) NOT NULL,
     category VARCHAR(191) NOT NULL,
     activity VARCHAR(191) NOT NULL,
     intensity VARCHAR(191) NOT NULL,
-    description VARCHAR(191) UNIQUE NOT NULL # limit on unique columns is floor(767/4)=191
+    description VARCHAR(255) NOT NULL,
+    UNIQUE KEY (category,activity,intensity)
 );
 CREATE TABLE nutrient (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -61,7 +62,6 @@ CREATE TABLE workout_log (
     user_id INT,
     workout_type_id INT,
     duration_seconds INT NOT NULL,
-    intensity VARCHAR(255), # What are the possible values for this? Low, Medium, High?
     PRIMARY KEY (date, user_id, workout_type_id),
     FOREIGN KEY (user_id) REFERENCES user(id),
     FOREIGN KEY (workout_type_id) REFERENCES workout_type(id)
