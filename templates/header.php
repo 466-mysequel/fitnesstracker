@@ -1,5 +1,4 @@
 <?php
-// global $start;
 $start = hrtime(true);
 ob_start("ob_gzhandler"); // enable gzip compression on output
 include_once '../src/library.php';
