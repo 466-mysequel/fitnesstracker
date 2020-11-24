@@ -314,12 +314,11 @@ class DB {
      * @param user_id The user's ID
      * @param weight_kg The user's current weight in kg
      * @return void
-     * @example log_weight(1, 100.0)
+     * @example log_weight(1, 100)
      * @see "Project issue #27"
      */
     function log_weight(int $user_id, int $weight_kg) 
     {
-
         $sql = "INSERT INTO weight_log(`date`, `user_id`, `weight_kg`) VALUES (NOW(), ?, ?);";
         $pdo = $this -> query($sql, [$user_id, $weight_kg]);
         return;
