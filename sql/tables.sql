@@ -1,6 +1,8 @@
-# Cleanup: 
+# Cleanup:
+\! echo "Dropping tables if they exist..."
 DROP TABLE IF EXISTS food_log,workout_log,weight_log,macronutrient_content,micronutrient_content,food,nutrient,workout_type,user;
 # Entities: 
+\! echo "Creating entity tables:"
 CREATE TABLE user (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(191) UNIQUE NOT NULL, # limit on unique columns is floor(767/4)=191
@@ -8,6 +10,7 @@ CREATE TABLE user (
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL
 );
+\! echo " * user"
 CREATE TABLE workout_type (
     id INT AUTO_INCREMENT PRIMARY KEY,
     mets_code INT UNIQUE NULL,
@@ -18,12 +21,14 @@ CREATE TABLE workout_type (
     description VARCHAR(255) NOT NULL,
     UNIQUE KEY (category,activity,intensity)
 );
+\! echo " * workout_type"
 CREATE TABLE nutrient (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(191) UNIQUE NOT NULL, # limit on unique columns is floor(767/4)=191
     rdv_amount DOUBLE NOT NULL, # https://www.fda.gov/media/99069/download
     rdv_unit ENUM('g', 'mg', 'mcg') DEFAULT 'mg' NOT NULL
 );
+\! echo " * nutrient"
 CREATE TABLE food ( # can store both food and beverages
     id INT AUTO_INCREMENT PRIMARY KEY,
     type ENUM('solid', 'liquid') DEFAULT 'solid' NOT NULL,
@@ -33,7 +38,9 @@ CREATE TABLE food ( # can store both food and beverages
     serving_size_cc INT, # Some servinc size are optionally measured also in volume, eg cups or ml. These should be converted to the metric volume cc.
     serving_size_friendly VARCHAR(255) # eg "half cup", "one egg", "2 cookies", "sleeve of oreos"
 );
+\! echo " * foot"
 # Relationships:
+\! echo "Creating relationship tables:"
 CREATE TABLE macronutrient_content (
     food_id INT,
     nutrient_id INT,
@@ -42,6 +49,7 @@ CREATE TABLE macronutrient_content (
     FOREIGN KEY (food_id) REFERENCES food(id),
     FOREIGN KEY (nutrient_id) REFERENCES nutrient(id)
 );
+\! echo " * macronutrient_content"
 CREATE TABLE micronutrient_content (
     food_id INT,
     nutrient_id INT,
@@ -50,6 +58,7 @@ CREATE TABLE micronutrient_content (
     FOREIGN KEY (food_id) REFERENCES food(id),
     FOREIGN KEY (nutrient_id) REFERENCES nutrient(id)
 );
+\! echo " * micronutrient_content"
 CREATE TABLE weight_log (
     date TIMESTAMP,
     user_id INT,
@@ -57,6 +66,7 @@ CREATE TABLE weight_log (
     PRIMARY KEY (date, user_id),
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
+\! echo " * weight_log "
 CREATE TABLE workout_log (
     date TIMESTAMP,
     user_id INT,
@@ -66,6 +76,7 @@ CREATE TABLE workout_log (
     FOREIGN KEY (user_id) REFERENCES user(id),
     FOREIGN KEY (workout_type_id) REFERENCES workout_type(id)
 );
+\! echo " * workout_log"
 CREATE TABLE food_log (
     date TIMESTAMP,
     user_id INT,
@@ -75,3 +86,4 @@ CREATE TABLE food_log (
     FOREIGN KEY (user_id) REFERENCES user(id),
     FOREIGN KEY (food_id) REFERENCES food(id)
 );
+\! echo " * food_log"
