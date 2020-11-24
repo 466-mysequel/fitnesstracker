@@ -310,13 +310,18 @@ class DB {
      *
      * The database will use the NOW() function for the time
      * 
+     * @author z1868762 HR0102
      * @param user_id The user's ID
      * @param weight_kg The user's current weight in kg
      * @return void
      * @example log_weight(1, 100.0)
      * @see "Project issue #27"
      */
-    function log_weight(int $user_id, double $weight_kg) {
+    function log_weight(int $user_id, double $weight_kg) 
+    {
+        $sql = "INSERT INTO weight_log ('date', 'user_id', 'weight_kg') VALUES (?, ?, ?);";
+        $rs = $this->prepare($sql);
+        $rs -> execute(array("NOW()" , $user_id, $weight_kg));
         return;
     }
     
