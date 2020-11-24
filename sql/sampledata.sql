@@ -1,3 +1,4 @@
+\! echo "Inserting sample data:"
 # Users
 INSERT INTO user (id, first_name, last_name, username, password) VALUES
     (1, 'Alice',   'Anderson', 'alice',   '$2y$10$V07jtzDcHw/LOqUyTM6gp.VgZ2Di6N38Arah/2aOZPTkUJFik9FQy'),
@@ -5,6 +6,7 @@ INSERT INTO user (id, first_name, last_name, username, password) VALUES
     (3, 'Charles', 'Clark',    'charlie', '$2y$10$QBAn8OaAqTa6H2e5teFuE.ukkR0XcZtpBcMvmMWYSPz8rP1uaTCtG'),
     (4, 'David',   'Davis',    'dave',    '$2y$10$z4tH5cp.PuqExVjEgW/72.HQW1fAMsaRqlo618k4DIgCpjhgtYrdi'),
     (5, 'Evelyn',  'Evans',    'eve',     '$2y$10$49bpYWA3Fhknb3Ib2bonYegG5TteYKyoXYEtWbQRAVyAhwNmCKR6e');
+\! echo " * user"
 
 # Nutrients
 INSERT INTO nutrient (name, rdv_amount, rdv_unit) VALUES
@@ -48,6 +50,7 @@ INSERT INTO nutrient (name, rdv_amount, rdv_unit) VALUES
     ('Iron',                 10, 'mg'),
     ('Trans Fat',             2, 'g'),
     ('Betaine',             500, 'mg');
+\! echo " * nutrient"
 
 # Workout Types
 INSERT INTO workout_type (id, mets_code, mets_value, category, activity, intensity, description) VALUES
@@ -872,6 +875,7 @@ INSERT INTO workout_type (id, mets_code, mets_value, category, activity, intensi
     (819,  21060,  4.5, 'volunteer activities',    'pushing something, general, walking',                                                       '3.0 mph moderately and carrying objects less than 25 lbs', 'walking, 3.0 mph moderately and carrying objects less than 25 lbs, pushing something'),
     (820,  21065,  4.8, 'volunteer activities',    'walking, general, walking',                                                                 '3.5 mph, briskly and carrying objects less than 25 lbs', 'walking, 3.5 mph, briskly and carrying objects less than 25 lbs'),
     (821,  21070,    3, 'volunteer activities',    'walk/stand combination, for volunteer purposes',                                            'normal',                                           'walk/stand combination, for volunteer purposes');
+\! echo " * workout_type"
 
 # Foods
 INSERT INTO food (id, type, name, calories_per_serving, serving_size_friendly, serving_size_grams, serving_size_cc) VALUES
@@ -885,6 +889,7 @@ INSERT INTO food (id, type, name, calories_per_serving, serving_size_friendly, s
     (8,  'solid',  'Wendy''s Small Vanilla Frosty',              340, '12 oz',                 340.195,    354.882),
     (9,  'solid',  'Lette Caramel Macaron',                       90, 'one macaron piece',          21,         21),
     (10, 'solid',  'Chocolate Pocky Sticks',                     150, '13 sticks',                  30,         30);
+\! echo " * food"
 
 # Micronutrient Content
 INSERT INTO micronutrient_content (food_id, nutrient_id, percent_dv) VALUES
@@ -950,6 +955,7 @@ INSERT INTO micronutrient_content (food_id, nutrient_id, percent_dv) VALUES
     (9,   11,   2),
     (10,  11,   3),
     (10,  35,   3);
+\! echo " * micronutrient_content"
 
 # Macronutrient Content
 INSERT INTO macronutrient_content (food_id, nutrient_id, amount) VALUES
@@ -1025,6 +1031,7 @@ INSERT INTO macronutrient_content (food_id, nutrient_id, amount) VALUES
     (10,   6,    0.5),
     (10,   8,     10),
     (10,   7,      2);
+\! echo " * macronutrient_content"
 
 # Weight Logs
 INSERT INTO weight_log (date, user_id, weight_kg) VALUES
@@ -1043,6 +1050,7 @@ INSERT INTO weight_log (date, user_id, weight_kg) VALUES
     (FROM_UNIXTIME(1605675057),  3,  74),
     (FROM_UNIXTIME(1605522657),  4,  85),
     (FROM_UNIXTIME(1605922257),  5,  64);
+\! echo " * weight_log"
 
 # Food Logs
 INSERT INTO food_log (date, user_id, food_id, servings) VALUES
@@ -1091,6 +1099,7 @@ INSERT INTO food_log (date, user_id, food_id, servings) VALUES
     (FROM_UNIXTIME(1605230795),  5,   9,  1),
     (FROM_UNIXTIME(1605230795),  5,   1,  3),
     (FROM_UNIXTIME(1605230795),  5,   2,  1);
+\! echo " * food_log"
 
 # Workout Logs
 INSERT INTO workout_log (date, user_id, workout_type_id, duration_seconds) VALUES
@@ -1109,3 +1118,4 @@ INSERT INTO workout_log (date, user_id, workout_type_id, duration_seconds) VALUE
     (FROM_UNIXTIME(1599696000),  2,   69,  3600),
     (FROM_UNIXTIME(1602288000),  5,   64,  4500),
     (FROM_UNIXTIME(1602460800),  5,   65,  4500);
+\! echo " * workout_log"
