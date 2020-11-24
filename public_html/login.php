@@ -14,9 +14,12 @@ if(is_authenticated()) {
     header("Location: $home/index.php", true, 303);
     die ("<html><body>You are already logged in. <a href=\"index.php\">Click here if your are not redirected automatically.</a></body></html>\n");
 }
-if(isset($_POST['username']) && isset($_POST['password']) && check_password($_POST['username'], $_POST['password'])) {
-    header("Location: $home/index.php", true, 303);
-    die ("<html><body>You have successfully logged in. <a href=\"index.php\">Click here if your are not redirected automatically.</a></body></html>\n");
+if(isset($_POST['username']) && isset($_POST['password'])) {
+    $db = new DB;
+    if($db->check_password($_POST['username'], $_POST['password'])) {
+        header("Location: $home/index.php", true, 303);
+        die ("<html><body>You have successfully logged in. <a href=\"index.php\">Click here if your are not redirected automatically.</a></body></html>\n");
+    }
 }
 
 // Start writing the page
