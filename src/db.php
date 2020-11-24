@@ -317,11 +317,11 @@ class DB {
      * @example log_weight(1, 100.0)
      * @see "Project issue #27"
      */
-    function log_weight(int $user_id, double $weight_kg) 
+    function log_weight(int $user_id, int $weight_kg) 
     {
-        $sql = "INSERT INTO weight_log ('date', 'user_id', 'weight_kg') VALUES (?, ?, ?);";
-        $rs = $this->prepare($sql);
-        $rs -> execute(array("NOW()" , $user_id, $weight_kg));
+
+        $sql = "INSERT INTO weight_log(`date`, `user_id`, `weight_kg`) VALUES (NOW(), ?, ?);";
+        $pdo = $this -> query($sql, [$user_id, $weight_kg]);
         return;
     }
     
