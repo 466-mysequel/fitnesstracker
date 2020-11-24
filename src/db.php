@@ -181,9 +181,39 @@ class DB {
      * @see "Project issue #23"
      */
     function add_user(string $username, string $password, string $first_name, string $last_name): int {
-        // Prepare insert statement
+        // validate parameters
+        if(strlen($username) < 3) {
+            return -1;
+        }
+        if(strlen($password) < 8) {
+            return -1;
+        }
+        if(strlen($first_name) < 2 || strlen($last_name) < 2) {
+            return -1;
+        }
+        // check input against database contents
+        $sql = "SELECT count(*) FROM user WHERE username = ?";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$username]);
+        $count = $stmt->fetchColumn();
+        
+        if($count != 0) {
+            // username exists
+            return -2;
+        }
 
+        // Prepare insert statement
+        $sql = "INSERT INTO user(username,password,first_name,last_name) VALUES(:username,:password,:first_name,:last_name)";
+        $stmt = $this->pdo->prepare($sql);
+
+        $encrypted_password = password_hash($password,PASSWORD_DEFAULT);
+        // Bind parameters
+        $stmt->bindParam(':username',$username);
+        $stmt->bindParam(':password',$encrypted_password);
+        $stmt->bindParam(':first_name',$first_name);
+        $stmt->bindParam(':last_name',$last_name);
         // Execute insert statement
+        $stmt->execute();
 
         return $this->pdo->lastInsertId();
     }
