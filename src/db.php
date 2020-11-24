@@ -297,9 +297,15 @@ class DB {
      * @example log_food(1, [1,2,3], [1,2,1])
      * @see "Project issue #27"
      */
-    function log_food(int $user_id, array $foods, array $servings) {
+    function log_food(int $user_id, array $foods, array $servings) 
+    {
+        $sql = "INSERT INTO food_log(`date`,`user_id`,`food_id`,`servings`) VALUES (NOW(),?,?,?);";
         // Prepare statement
-
+        $stmt = $this->pdo->prepare($sql);
+        foreach($foods as $key=>$food_id)
+        {
+         $stmt ->execute(array($user_id,$key,$key));   
+        }
         // foreach food as food_id
         //     execute statement
         return;
