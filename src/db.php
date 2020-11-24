@@ -329,13 +329,17 @@ class DB {
      *
      * The database will use the NOW() function for the time
      * 
+     * @author z1868762 HR0102
      * @param user_id The user's ID
      * @param workout_type_id The id of the workout_type
+     * @param duration_secs  The duration of the workout
      * @return void
-     * @example log_workout(1, 1)
+     * @example log_workout(1, 1,1)
      * @see "Project issue #27"
      */
-    function log_workout(int $user_id, int $workout_type_id) {
+    function log_workout(int $user_id, int $workout_type_id,int $duration_secs) {
+        $sql = "INSERT INTO workout_log(`date`, `user_id`, `workout_type_id`,`duration_seconds`) VALUES (NOW(), ?, ?,?);";
+        $pdo = $this -> query($sql, [$user_id,$workout_type_id,$duration_secs]);
         return;
     }
 }
