@@ -103,9 +103,13 @@ class DB {
      * @see "Project issue #23"
      */
     function check_password(string $username, string $password): bool {
+        $sql = "SELECT password FROM user WHERE username = :username";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':username',$username);
+        $stmt->execute();
         /** @var password_hash is the encrypted password from the database */
-        $password_hash;
-        return true; // password_verify($password, $password_hash)
+        $password_hash = $stmt->fetchColumn();
+        return password_verify($password, $password_hash);
     }
 
     /**
