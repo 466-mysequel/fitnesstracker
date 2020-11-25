@@ -92,7 +92,7 @@ class DB {
     }
 
     /**
-     * Get user id array
+     * Get user id
      * 
      * Get a user_id from table user
      * 
