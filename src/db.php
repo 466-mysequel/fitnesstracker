@@ -138,10 +138,11 @@ class DB {
      * @example add_nutrient("caffeine", 0.0, "mg")
      * @see "Project issue #25"
      */
-    function add_nutrient(string $name, double $rdv_amount, string $rdv_unit): int {
+    function add_nutrient(string $name, float $rdv_amount, string $rdv_unit): int {
         // Prepare statement
-
-        // Execute statement
+        $sql = "INSERT INTO nutrient (name, rdv_amount, rdv_unit) VALUES (?, ?, ?)";
+        // Execute statement;
+        $pdo = $this -> query($sql, [$name, $rdv_amount, $rdv_unit]);
 
         return $this->pdo->lastInsertId();
     }
@@ -252,19 +253,20 @@ class DB {
      * @see "Project issue #25"
      */
     function add_workout_type(
-        double $mets_value,
+        float $mets_value,
         string $category,
         string $activity,
         string $intensity,
         ?string $description = null
-    ): int
-    {
+    ): int {
         if(is_null($description)) {
             $description = "$activity, $intensity";
         }
-        // Prepare statement
-
+        // Prepare insert statement
+        $sql = "INSERT INTO workout_type (mets_value, category, activity, intensity, description) VALUES (?, ?, ?, ?, ?)";
+        
         // Execute statement
+        $pdo = $this -> query($sql, [$mets_value, $category, $activity, $intensity, $description]);
 
         return $this->pdo->lastInsertId();
     }
