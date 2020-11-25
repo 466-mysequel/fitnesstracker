@@ -300,15 +300,15 @@ class DB {
      */
     function log_food(int $user_id, array $foods, array $servings) 
     {
-        $sql = "INSERT INTO food_log(`date`,`user_id`,`food_id`,`servings`) VALUES (NOW(),?,?,?);";
+        $sql = "INSERT INTO food_log(`date`,`user_id`,`food_id`,`servings`) VALUES (NOW(),?,?,?)";
         // Prepare statement
         $stmt = $this->pdo->prepare($sql);
-        foreach($foods as $key=>$food_id)
-        {
-         $stmt ->execute(array($user_id,$foods[$key],$servings[$key]));   
-        }
         // foreach food as food_id
-        //     execute statement
+        foreach($foods as $key=>$food_id)                                          
+        {
+            //execute statement
+            $stmt ->execute(array($user_id, $foods[$key], $servings[$key]));   
+        }
         return;
     }
 
@@ -321,12 +321,12 @@ class DB {
      * @param user_id The user's ID
      * @param weight_kg The user's current weight in kg
      * @return void
-     * @example log_weight(1, 100)
+     * @example log_weight(1, 100.0)
      * @see "Project issue #27"
      */
-    function log_weight(int $user_id, int $weight_kg) 
+    function log_weight(int $user_id, float $weight_kg) 
     {
-        $sql = "INSERT INTO weight_log(`date`, `user_id`, `weight_kg`) VALUES (NOW(), ?, ?);";
+        $sql = "INSERT INTO weight_log(`date`, `user_id`, `weight_kg`) VALUES (NOW(), ?, ?)";
         $pdo = $this -> query($sql, [$user_id, $weight_kg]);
         return;
     }
@@ -339,14 +339,14 @@ class DB {
      * @author z1868762 HR0102
      * @param user_id The user's ID
      * @param workout_type_id The id of the workout_type
-     * @param duration_secs  The duration of the workout
+     * @param duration_secs The duration of the workout
      * @return void
-     * @example log_workout(1, 1,1)
+     * @example log_workout(1,1,1)
      * @see "Project issue #27"
      */
-    function log_workout(int $user_id, int $workout_type_id,int $duration_secs) {
-        $sql = "INSERT INTO workout_log(`date`, `user_id`, `workout_type_id`,`duration_seconds`) VALUES (NOW(), ?, ?,?);";
-        $pdo = $this -> query($sql, [$user_id,$workout_type_id,$duration_secs]);
+    function log_workout(int $user_id, int $workout_type_id, int $duration_secs) {
+        $sql = "INSERT INTO workout_log(`date`, `user_id`, `workout_type_id`,`duration_seconds`) VALUES (NOW(), ?, ?, ?)";
+        $pdo = $this -> query($sql, [$user_id, $workout_type_id, $duration_secs]);
         return;
     }
 }
