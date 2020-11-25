@@ -289,6 +289,7 @@ class DB {
      *
      * The database will use the NOW() function for the time
      * 
+     * @author z1868762 HR0102
      * @param user_id The user's ID
      * @param int[] foods An array of food_ids
      * @param double[] servings An array of how many searvings for each food_id
@@ -304,7 +305,7 @@ class DB {
         $stmt = $this->pdo->prepare($sql);
         foreach($foods as $key=>$food_id)
         {
-         $stmt ->execute(array($user_id,$key,$key));   
+         $stmt ->execute(array($user_id,$foods[$key],$servings[$key]));   
         }
         // foreach food as food_id
         //     execute statement
