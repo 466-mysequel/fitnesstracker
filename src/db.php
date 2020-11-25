@@ -92,6 +92,22 @@ class DB {
     }
 
     /**
+     * Get user id array
+     * 
+     * Get a user_id from table user
+     * 
+     * @author @john
+     * @param username
+     * @return int user id
+     * @example get_user_id("eve")
+     */
+    function get_user_id(string $username) :int {
+        $sql = "SELECT id FROM user WHERE username = ?";
+        $id = $this->query($sql,[$username])->fetchColumn();
+        return (int)$id;
+    }
+
+    /**
      * Check password
      * 
      * Connect to the database and run password_verify() against the stored hash

@@ -17,6 +17,9 @@ if(is_authenticated()) {
 if(isset($_POST['username']) && isset($_POST['password'])) {
     $db = new DB;
     if($db->check_password($_POST['username'], $_POST['password'])) {
+        session_start();
+        $_SESSION['id'] = $db->get_user_id($_POST['username']);
+        $_SESSION['auth_status'] = true;
         header("Location: $home/index.php", true, 303);
         die ("<html><body>You have successfully logged in. <a href=\"index.php\">Click here if your are not redirected automatically.</a></body></html>\n");
     }
