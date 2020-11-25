@@ -92,6 +92,22 @@ class DB {
     }
 
     /**
+     * Get user id
+     * 
+     * Get a user_id from table user
+     * 
+     * @author @john
+     * @param username
+     * @return int user id
+     * @example get_user_id("eve")
+     */
+    function get_user_id(string $username) :int {
+        $sql = "SELECT id FROM user WHERE username = ?";
+        $id = $this->query($sql,[$username])->fetchColumn();
+        return (int)$id;
+    }
+
+    /**
      * Check password
      * 
      * Connect to the database and run password_verify() against the stored hash
@@ -103,9 +119,13 @@ class DB {
      * @see "Project issue #23"
      */
     function check_password(string $username, string $password): bool {
+        $sql = "SELECT password FROM user WHERE username = :username";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':username',$username);
+        $stmt->execute();
         /** @var password_hash is the encrypted password from the database */
-        $password_hash;
-        return true; // password_verify($password, $password_hash)
+        $password_hash = $stmt->fetchColumn();
+        return password_verify($password, $password_hash);
     }
 
     /**
@@ -181,9 +201,39 @@ class DB {
      * @see "Project issue #23"
      */
     function add_user(string $username, string $password, string $first_name, string $last_name): int {
-        // Prepare insert statement
+        // validate parameters
+        if(strlen($username) < 3) {
+            return -1;
+        }
+        if(strlen($password) < 8) {
+            return -1;
+        }
+        if(strlen($first_name) < 2 || strlen($last_name) < 2) {
+            return -1;
+        }
+        // check input against database contents
+        $sql = "SELECT count(*) FROM user WHERE username = ?";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$username]);
+        $count = $stmt->fetchColumn();
+        
+        if($count != 0) {
+            // username exists
+            return -2;
+        }
 
+        // Prepare insert statement
+        $sql = "INSERT INTO user(username,password,first_name,last_name) VALUES(:username,:password,:first_name,:last_name)";
+        $stmt = $this->pdo->prepare($sql);
+
+        $encrypted_password = password_hash($password,PASSWORD_DEFAULT);
+        // Bind parameters
+        $stmt->bindParam(':username',$username);
+        $stmt->bindParam(':password',$encrypted_password);
+        $stmt->bindParam(':first_name',$first_name);
+        $stmt->bindParam(':last_name',$last_name);
         // Execute insert statement
+        $stmt->execute();
 
         return $this->pdo->lastInsertId();
     }
