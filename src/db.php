@@ -122,8 +122,6 @@ class DB {
         // Prepare statement
         $sql = "INSERT INTO nutrient (name, rdv_amount, rdv_unit) VALUES (?, ?, ?)";
         // Execute statement;
-        //$stmt = $this->pdo->prepare($sql);
-        //$stmt->execute($name,$rdv_amount,$rdv_unit);
         $pdo = $this -> query($sql, [$name, $rdv_amount, $rdv_unit]);
 
         return $this->pdo->lastInsertId();
