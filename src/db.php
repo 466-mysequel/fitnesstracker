@@ -118,10 +118,13 @@ class DB {
      * @example add_nutrient("caffeine", 0.0, "mg")
      * @see "Project issue #25"
      */
-    function add_nutrient(string $name, double $rdv_amount, string $rdv_unit): int {
+    function add_nutrient($name, $rdv_amount, $rdv_unit): int {
         // Prepare statement
-
-        // Execute statement
+        $sql = "INSERT INTO nutrient (name, rdv_amount, rdv_unit) VALUES (?, ?, ?)";
+        // Execute statement;
+        //$stmt = $this->pdo->prepare($sql);
+        //$stmt->execute($name,$rdv_amount,$rdv_unit);
+        $pdo = $this -> query($sql, [$name, $rdv_amount, $rdv_unit]);
 
         return $this->pdo->lastInsertId();
     }
