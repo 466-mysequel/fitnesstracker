@@ -141,96 +141,12 @@ function volume_to_cc(float $qty, string $begin_unit)
             return $qty * $tbspRatio;     
             break;
         //teaspoon to milliliters
-        case: "tsp":       
+        case "tsp":       
             return $qty * $tspRatio;     
             break;
         //invalid entered unit
         default:
             echo "unit not found";    
-            return -1;  
-    }
-}
-
-
-
-/**
- * Convert from mL/cc into another unit
- * 
- * This function first converts Milliliters/Cubic Centimeters
- * into the ending unit using division
- * 
- * @author z1868762
- * @param qty - the amount of the beginning unit that needs to be converted
- * @param $end_unit - the symbol unit before converting
- * @return float - the quantity of the end unit after conversion. Returns -1 on error
- * @example - volume_from_cc(56.3, "tsp"); - Converts 56.3 milliliters into teaspoons
- * @example - volume_from_cc(13, "fl oz"); - Converts 13 milliliters into fluid ounces
- * @warning - DO NOT USE "oz" for fluid ounces. Mass also uses ounces as a unit, so I'd like to seperate 
- *            "fl oz" for fluid ounces in volume and "oz" for ounces in mass to avoid confusion
- * @note - extra and not needed for #41
- * 
- */
-function volume_from_cc(float $qty, string $end_unit)
-{
-    $literRatio = 1000;
-    $gallonRatio = 3785.41;
-    $quartRatio = 946.353;
-    $pintRatio = 473.176;
-    $cupRatio = 236.588;
-    $fluidOZRatio = 29.5735;
-    $tbspRatio = 14.7868;
-    $tspRatio = 4.92892;
-    //converting from mililliters to ending unit with division
-    switch($end_unit)
-    {
-        //if user wants milliliters, no change needed
-        case "mL":   
-            return $qty;
-            break;
-
-        //milliliters to liters
-        case "L"        
-            return $value/$literRatio;    
-            break;
-
-        //milliliters to gallons
-        case "gal":      
-            return $value/$gallonRatio;     
-            break;
-
-        //milliliters to quart 
-        case "qt":       
-            return $value/$quartRatio;      
-            break;
-
-        // milliliters to pint 
-        case "pt":       
-            return $value/$pintRatio;     
-            break;
-
-        // milliliters to cup  
-        case "cup":      
-            return $value/$cupRatio;        
-            break;
-
-        //milliliters to ounces         
-        case "fl oz":   
-            return $value/$fluidOZRatio;    
-            break;
-
-        //milliliters to tablespoon 
-        case "tbsp":     
-            return $value/$tbspRatio;       
-            break;
-
-        //milliliters to teaspoons  
-        case "tsp":
-            return $value/$tspRatio;        
-            break;
-
-        //invalid ending unit
-        default: 
-            echo "unit not found";   
             return -1;  
     }
 }
@@ -265,24 +181,106 @@ function mass_to_g(float $qty, string $begin_unit)
             return $qty;  
             break;
 
-    //pounds to grams
+        //pounds to grams
         case "lb":     
             return $qty * $poundRatio;     
             break;    
     
-    //ounces to grams
+        //ounces to grams
         case "oz":     
             return $qty * $ounceRatio;     
             break;
 
-    //kilogram to grams
+        //kilogram to grams
         case "kg":    
             return $qty * $kilogramRatio;  
             break;
 
-    //unit is not found
-        default
+        //unit is not found
+        default:
             echo "unit not found"; 
+            return -1;  
+    }
+}
+
+
+/**
+ * Convert from mL/cc into another unit
+ * 
+ * This function first converts Milliliters/Cubic Centimeters
+ * into the ending unit using division
+ * 
+ * @author z1868762
+ * @param qty - the amount of the beginning unit that needs to be converted
+ * @param $end_unit - the symbol unit before converting
+ * @return float - the quantity of the end unit after conversion. Returns -1 on error
+ * @example - volume_from_cc(56.3, "tsp"); - Converts 56.3 milliliters into teaspoons
+ * @example - volume_from_cc(13, "fl oz"); - Converts 13 milliliters into fluid ounces
+ * @warning - DO NOT USE "oz" for fluid ounces. Mass also uses ounces as a unit, so I'd like to seperate 
+ *            "fl oz" for fluid ounces in volume and "oz" for ounces in mass to avoid confusion
+ * @note - extra and not needed for #41
+ */
+function volume_from_cc(float $qty, string $end_unit)
+{
+    $literRatio = 1000;
+    $gallonRatio = 3785.41;
+    $quartRatio = 946.353;
+    $pintRatio = 473.176;
+    $cupRatio = 236.588;
+    $fluidOZRatio = 29.5735;
+    $tbspRatio = 14.7868;
+    $tspRatio = 4.92892;
+    //converting from mililliters to ending unit with division
+    switch($end_unit)
+    {
+        //if user wants milliliters, no change needed
+        case "mL":   
+            return $qty;
+            break;
+
+        //milliliters to liters
+        case "L":        
+            return $qty/$literRatio;    
+            break;
+
+        //milliliters to gallons
+        case "gal":      
+            return $qty/$gallonRatio;     
+            break;
+
+        //milliliters to quart 
+        case "qt":       
+            return $qty/$quartRatio;      
+            break;
+
+        // milliliters to pint 
+        case "pt":       
+            return $qty/$pintRatio;     
+            break;
+
+        // milliliters to cup  
+        case "cup":      
+            return $qty/$cupRatio;        
+            break;
+
+        //milliliters to ounces         
+        case "fl oz":   
+            return $qty/$fluidOZRatio;    
+            break;
+
+        //milliliters to tablespoon 
+        case "tbsp":     
+            return $qty/$tbspRatio;       
+            break;
+
+        //milliliters to teaspoons  
+        case "tsp":
+            return $qty/$tspRatio;        
+            break;
+
+        //invalid ending unit
+        default: 
+            echo "unit not found";   
             return -1;  
     }
 }
@@ -312,27 +310,27 @@ function mass_from_g(float $qty, string $end_unit)
 
     switch($end_unit)
     {
-    //no changes needed if already in grams
+        //no changes needed if already in grams
         case "g":     
             return $qty;   
             break;
 
-    //grams to pounds
+        //grams to pounds
         case "lb":       
             return $qty/$poundRatio;   
             break;      
 
-    //grams to ounces
+        //grams to ounces
         case "oz":      
             return $qty/$ounceRatio;      
             break;
 
-    //grams to kilograms
+        //grams to kilograms
         case "kg":     
             return $qty/$kilogramRatio;   
 
-    //ending unit not found
-        default
+        //ending unit not found
+        default:
             echo "ending unit not found";    
             return -1;     
     }
