@@ -171,58 +171,67 @@ function volume_to_cc(float $qty, string $begin_unit)
  * 
  */
 function volume_from_cc(float $qty, string $end_unit)
+{
+    $literRatio = 1000;
+    $gallonRatio = 3785.41;
+    $quartRatio = 946.353;
+    $pintRatio = 473.176;
+    $cupRatio = 236.588;
+    $fluidOZRatio = 29.5735;
+    $tbspRatio = 14.7868;
+    $tspRatio = 4.92892;
     //converting from mililliters to ending unit with division
     switch($end_unit)
     {
-    //if user wants milliliters, no change needed
-    case "mL":   
-        return $qty;
-        break;
+        //if user wants milliliters, no change needed
+        case "mL":   
+            return $qty;
+            break;
 
-    //milliliters to liters
-    case "L"        
-        return $value/$literRatio;    
-        break;
+        //milliliters to liters
+        case "L"        
+            return $value/$literRatio;    
+            break;
 
-    //milliliters to gallons
-    case "gal":      
-        return $value/$gallonRatio;     
-        break;
+        //milliliters to gallons
+        case "gal":      
+            return $value/$gallonRatio;     
+            break;
 
-    //milliliters to quart 
-    case "qt":       
-        return $value/$quartRatio;      
-        break;
+        //milliliters to quart 
+        case "qt":       
+            return $value/$quartRatio;      
+            break;
 
-    // milliliters to pint 
-    case "pt":       
-        return $value/$pintRatio;     
-        break;
+        // milliliters to pint 
+        case "pt":       
+            return $value/$pintRatio;     
+            break;
 
-    // milliliters to cup  
-    case "cup":      
-        return $value/$cupRatio;        
-        break;
+        // milliliters to cup  
+        case "cup":      
+            return $value/$cupRatio;        
+            break;
 
-    //milliliters to ounces         
-    case "fl oz":   
-        return $value/$fluidOZRatio;    
-        break;
+        //milliliters to ounces         
+        case "fl oz":   
+            return $value/$fluidOZRatio;    
+            break;
 
-    //milliliters to tablespoon 
-    case "tbsp":     
-        return $value/$tbspRatio;       
-        break;
+        //milliliters to tablespoon 
+        case "tbsp":     
+            return $value/$tbspRatio;       
+            break;
 
-    //milliliters to teaspoons  
-    case "tsp":
-        return $value/$tspRatio;        
-        break;
+        //milliliters to teaspoons  
+        case "tsp":
+            return $value/$tspRatio;        
+            break;
 
-    //invalid ending unit
-    default: 
-        echo "unit not found";   
-        return -1;  
+        //invalid ending unit
+        default: 
+            echo "unit not found";   
+            return -1;  
     }
 }
 
@@ -230,60 +239,103 @@ function volume_from_cc(float $qty, string $end_unit)
 /**
  * Convert from one unit of mass to another
  * 
- * This function first converts the beginning unit of mass to grams
- * by multiplicating the conversion ratio from the beginning unit to grams then divides
- * by the conversion ratio from the grams to the end Unit.
+ * This function converts the beginning unit of mass into grams
+ * by multiplicating the conversion ratio from the beginning unit to grams 
  * 
  * @author z1868762
  * @param qty - the amount of the beginning unit that needs to be converted
  * @param $begin_unit - the symbol unit before converting
- * @param $end_unit - the symbol unit after converting
  * @return float - the quantity of the end unit after conversion. Returns -1 on error
- * @example - convertMass(100,"kg" , "lb"); - Converts 100 kilograms into pounds
- * @example - convertMass(15, "oz", "g"); - Converts 15 ounces into grams
+ * @example - mass_to_g(100,"kg"); - Converts 100 kilograms into grams
+ * @example - mass_to_g(15, "oz"); - Converts 15 ounces into grams
  * @warning - It doesn't make sense to use "fl oz" for ounces in mass, but just putting this here
  *            in case: DO NOT USE "fl oz" FOR ounces.
  * @see "Project Issue #41"
- * 
  */
-function convertMass(float $qty, string $begin_unit, string $end_unit)
+function mass_to_g(float $qty, string $begin_unit)
 {
     $poundRatio = 453.592;
     $ounceRatio = 28.3495;
     $kilogramRatio = 1000;
 
-    //no need to convert if the beginning unit is grams
-    if($begin_unit == "g")   {   $value = $qty;  }
+    switch($begin_unit)
+    {
+        //no need to convert if the beginning unit is grams
+        case "g":      
+            return $qty;  
+            break;
 
     //pounds to grams
-    else if($begin_unit == "lb")     {   $value = $qty * $poundRatio;     }        
+        case "lb":     
+            return $qty * $poundRatio;     
+            break;    
     
     //ounces to grams
-    else if($begin_unit == "oz")     {   $value = $qty * $ounceRatio;     }
+        case "oz":     
+            return $qty * $ounceRatio;     
+            break;
 
     //kilogram to grams
-    else if($begin_unit == "kg")     {   $value = $qty * $kilogramRatio;  }
+        case "kg":    
+            return $qty * $kilogramRatio;  
+            break;
 
-    //beginning unit is not found
-    else    {   echo "beginning unit not found"; return -1;     }
+    //unit is not found
+        default
+            echo "unit not found"; 
+            return -1;  
+    }
+}
 
 
+/**
+ * Convert from grams to another unit of measurement
+ * 
+ * This function converts the unit of grams into another unit by division
+ * 
+ * @author z1868762
+ * @param qty - the amount of the beginning unit that needs to be converted
+ * @param $end_unit - the symbol unit before converting
+ * @return float - the quantity of the end unit after conversion. Returns -1 on error
+ * @example - mass_from_g(100,"kg"); - Converts 100 kilograms into grams
+ * @example - mass_from_g(15, "oz"); - Converts 15 ounces into grams
+ * @warning - It doesn't make sense to use "fl oz" for ounces in mass, but just putting this here
+ *            in case: DO NOT USE "fl oz" FOR ounces.
+ * @note - extra function not needed for #41
+ */
+function mass_from_g(float $qty, string $end_unit)
+{
+    $poundRatio = 453.592;
+    $ounceRatio = 28.3495;
+    $kilogramRatio = 1000;
     //dividing the units into the end unit
 
+    switch($end_unit)
+    {
     //no changes needed if already in grams
-    if($end_unit == "g")     {   return $value;   }
+        case "g":     
+            return $qty;   
+            break;
 
     //grams to pounds
-    else if($end_unit == "lb")       {   return $value/$poundRatio;      }   
+        case "lb":       
+            return $qty/$poundRatio;   
+            break;      
 
     //grams to ounces
-    else if($end_unit == "oz")       {   return $value/$ounceRatio;      }
+        case "oz":      
+            return $qty/$ounceRatio;      
+            break;
 
     //grams to kilograms
-    else if($end_unit == "kg")       {   return $value/$kilogramRatio;   }
+        case "kg":     
+            return $qty/$kilogramRatio;   
 
     //ending unit not found
-    else    {   echo "ending unit not found";    return -1;      }
+        default
+            echo "ending unit not found";    
+            return -1;     
+    }
 }
 
 ?>
