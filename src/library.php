@@ -81,7 +81,7 @@ function is_authenticated(): bool {
 
 
 /**
- * Convert from one unit to another
+ * Convert from one unit of volume to another
  * 
  * This function first converts the beginning unit to Milliliters/Cubic Centimeters
  * by multiplicating the conversion ratio from the beginning unit to Milliliters then divides
@@ -92,8 +92,10 @@ function is_authenticated(): bool {
  * @param beginUnit - the symbol unit before converting
  * @param endUnit - the symbol unit after converting
  * @return float - the quantity of the end unit after conversion. Returns -1 on error
- * @example - convertVolume(56.3, tsp, L); - Converts 56.3 tablespoons into Liters
- * @example - convertVolume(13, oz, pt); - Converts 13 fluid ounces into pints
+ * @example - convertVolume(56.3, "tsp", "L"); - Converts 56.3 tablespoons into Liters
+ * @example - convertVolume(13, "fl oz" , "pt" ); - Converts 13 fluid ounces into pints
+ * @warning - DO NOT USE "oz" for fluid ounces. Mass also uses ounces as a unit, so I'd like to use 
+ *            "fl oz" for fluid ounces in volume and "oz" for ounces in mass to avoid confusion
  * @see "Project Issue #41"
  * 
  */
@@ -104,7 +106,7 @@ function convertVolume(float $qty, string $beginUnit, string $endUnit)
     $quartRatio = 946.353;
     $pintRatio = 473.176;
     $cupRatio = 236.588;
-    $ounceRatio = 29.5735;
+    $fluidOZRatio = 29.5735;
     $tbspRatio = 14.7868;
     $tspRatio = 4.92892;
     //since we're converting to milliliters, no math needs to be done if begin unit is mililiters
@@ -126,7 +128,7 @@ function convertVolume(float $qty, string $beginUnit, string $endUnit)
     else if($beginUnit == "cup")    {   $value = $qty * $cupRatio;      }
 
     //ounces to milliliters
-    else if($beginUnit == "oz")     {   $value = $qty * $ounceRatio;    }
+    else if($beginUnit == "fl oz")  {   $value = $qty * $fluidOZRatio;  }
 
     //tablespoon to milliliters
     else if($beginUnit == "tbsp")   {   $value = $qty * $tbspRatio;     }
@@ -158,15 +160,76 @@ function convertVolume(float $qty, string $beginUnit, string $endUnit)
     else if($endUnit == "cup")      {   return $value/$cupRatio;        }
 
     //milliliters to ounces         
-    else if($endUnit == "oz")       {   return $value/$ounceRatio;      }
+    else if($endUnit == "fl oz")    {   return $value/$fluidOZRatio;    }
 
     //milliliters to tablespoon 
     else if($endUnit == "tbsp")     {   return $value/$tbspRatio;       }
 
     //milliliters to teaspoons  
-    else if($endUnit == "tsp")      {   return $value/$tspRatio;         }
+    else if($endUnit == "tsp")      {   return $value/$tspRatio;        }
 
     //invalid ending unit
     else    {   echo "ending unit not found";   return -1;  }
 }
+
+
+/**
+ * Convert from one unit of mass to another
+ * 
+ * This function first converts the beginning unit of mass to grams
+ * by multiplicating the conversion ratio from the beginning unit to grams then divides
+ * by the conversion ratio from the grams to the end Unit.
+ * 
+ * @author z1868762
+ * @param qty - the amount of the beginning unit that needs to be converted
+ * @param beginUnit - the symbol unit before converting
+ * @param endUnit - the symbol unit after converting
+ * @return float - the quantity of the end unit after conversion. Returns -1 on error
+ * @example - convertMass(100,"kg" , "lb"); - Converts 100 kilograms into pounds
+ * @example - convertMass(15, "oz", "g"); - Converts 15 ounces into grams
+ * @warning - It doesn't make sense to use "fl oz" for ounces in mass, but just putting this here
+ *            in case: DO NOT USE "fl oz" FOR ounces.
+ * @see "Project Issue #41"
+ * 
+ */
+function convertMass(float $qty, string $beginUnit, string $endUnit)
+{
+    $poundRatio = 453.592;
+    $ounceRatio = 28.3495;
+    $kilogramRatio = 1000;
+
+    //no need to convert if the beginning unit is grams
+    if($beginUnit == "g")   {   $value = $qty;  }
+
+    //pounds to grams
+    else if($beginUnit == "lb")     {   $value = $qty * $poundRatio;     }        
+    
+    //ounces to grams
+    else if($beginUnit == "oz")     {   $value = $qty * $ounceRatio;     }
+
+    //kilogram to grams
+    else if($beginUnit == "kg")     {   $value = $qty * $kilogramRatio;  }
+
+    //beginning unit is not found
+    else    {   echo "beginning unit not found"; return -1;     }
+
+
+    //dividing the units into the end unit
+
+    //no changes needed if already in grams
+    if($endUnit == "g")     {   return $value;   }
+
+    //grams to pounds
+    else if($endUnit == "lb")       {   return $value/$poundRatio;      }   
+
+    //grams to ounces
+    else if($endUnit == "oz")       {   return $value/$ounceRatio;      }
+
+    //grams to kilograms
+    else if($endUnit == "kg")       {   return $value/$kilogramRatio;   }
+
+    //ending unit not found
+    else    {   echo "ending unit not found";    return -1;      }
+}
+
 ?>
