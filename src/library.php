@@ -78,7 +78,24 @@ function is_authenticated(): bool {
 }
 
 
-
+/**
+ * Convert Class definition
+ * 
+ * This class stores all the ratios and functions needed to convert the units
+ * into mililliters for volume and grams for mass.
+ * 
+ * Recommended use of member functions examples: 
+ *  convert::mass_to_g(45, "oz");
+ *  convert::mass_from_g(132, "kg");
+ *  convert::volume_to_cc(23, "tbsp");
+ *  convert::volume_from_cc(55, "pt");
+ * 
+ * You can also create a convert class object and call the functions but is not recommended 
+ * as the object itself is not very useful once conversions are finished
+ *  $convertClassName = new convert();
+ *      $convertClassName -> mass_to_g(45, "oz");
+ *      $convertClassName -> mass_from_g(123, "kg");
+ */
 class convert
 {
     //volume ratios
