@@ -84,22 +84,20 @@ function is_authenticated(): bool {
  * Convert from one unit of volume to another
  * 
  * This function first converts the beginning unit to Milliliters/Cubic Centimeters
- * by multiplicating the conversion ratio from the beginning unit to Milliliters then divides
- * by the conversion ratio from the milliliters to the end Unit.
+ * by multiplicating the conversion ratio from the beginning unit to Milliliters 
  * 
  * @author z1868762
  * @param qty - the amount of the beginning unit that needs to be converted
- * @param beginUnit - the symbol unit before converting
- * @param endUnit - the symbol unit after converting
+ * @param $begin_unit - the symbol unit before converting
  * @return float - the quantity of the end unit after conversion. Returns -1 on error
- * @example - convertVolume(56.3, "tsp", "L"); - Converts 56.3 tablespoons into Liters
- * @example - convertVolume(13, "fl oz" , "pt" ); - Converts 13 fluid ounces into pints
- * @warning - DO NOT USE "oz" for fluid ounces. Mass also uses ounces as a unit, so I'd like to use 
+ * @example - volume_to_cc(56.3, "tsp"); - Converts 56.3 tablespoons into mL/cc
+ * @example - volume_to_cc(13, "fl oz"); - Converts 13 fluid ounces into mL/cc
+ * @warning - DO NOT USE "oz" for fluid ounces. Mass also uses ounces as a unit, so I'd like to seperate 
  *            "fl oz" for fluid ounces in volume and "oz" for ounces in mass to avoid confusion
  * @see "Project Issue #41"
  * 
  */
-function convertVolume(float $qty, string $beginUnit, string $endUnit)
+function volume_to_cc(float $qty, string $begin_unit)
 {
     $literRatio = 1000;
     $gallonRatio = 3785.41;
@@ -109,67 +107,123 @@ function convertVolume(float $qty, string $beginUnit, string $endUnit)
     $fluidOZRatio = 29.5735;
     $tbspRatio = 14.7868;
     $tspRatio = 4.92892;
-    //since we're converting to milliliters, no math needs to be done if begin unit is mililiters
-    if($beginUnit == "mL")  {   $value = $qty;  }
+    switch($begin_unit)
+    {
+        //since we're converting to milliliters, no math needs to be done if begin unit is mililiters
+        case "mL":
+            return $qty;
+            break;
+        //liters to milliliters
+        case "L":
+            return $qty * $literRatio;
+            break;
+        //gallons to milliliters
+        case "gal":       
+            return $qty * $gallonRatio;   
+            break;
+        //quart to milliliters
+        case "qt":
+            return $qty * $quartRatio;
+            break;
+        case "pt":
+            return $qty * $pintRatio;
+            break;
+        //cup to milliliters
+        case "cup":   
+            return $qty * $cupRatio;      
+            break;
+        //ounces to milliliters
+        case "fl oz": 
+            return $qty * $fluidOZRatio;
+            break;
+        //tablespoon to milliliters
+        case "tbsp":      
+            return $qty * $tbspRatio;     
+            break;
+        //teaspoon to milliliters
+        case: "tsp":       
+            return $qty * $tspRatio;     
+            break;
+        //invalid entered unit
+        default:
+            echo "unit not found";    
+            return -1;  
+    }
+}
 
-    //liters to milliliters
-    else if($beginUnit == "L")      {   $value = $qty * $literRatio;    }
 
-    //gallons to milliliters
-    else if($beginUnit == "gal")    {   $value = $qty * $gallonRatio;   }
 
-    //quart to milliliters
-    else if($beginUnit == "qt")     {   $value = $qty * $quartRatio;    }
-
-    //pint to milliliters
-    else if($beginUnit == "pt")     {   $value = $qty * $pintRatio;     }
-
-    //cup to milliliters
-    else if($beginUnit == "cup")    {   $value = $qty * $cupRatio;      }
-
-    //ounces to milliliters
-    else if($beginUnit == "fl oz")  {   $value = $qty * $fluidOZRatio;  }
-
-    //tablespoon to milliliters
-    else if($beginUnit == "tbsp")   {   $value = $qty * $tbspRatio;     }
-
-    //teaspoon to milliliters
-    else if($beginUnit == "tsp")    {   $value = $qty * $tspRatio;      }
-
-    //invalid beginning unit
-    else    {   echo "Beginning unit not found";    return -1;  }
-
+/**
+ * Convert from mL/cc into another unit
+ * 
+ * This function first converts Milliliters/Cubic Centimeters
+ * into the ending unit using division
+ * 
+ * @author z1868762
+ * @param qty - the amount of the beginning unit that needs to be converted
+ * @param $end_unit - the symbol unit before converting
+ * @return float - the quantity of the end unit after conversion. Returns -1 on error
+ * @example - volume_from_cc(56.3, "tsp"); - Converts 56.3 milliliters into teaspoons
+ * @example - volume_from_cc(13, "fl oz"); - Converts 13 milliliters into fluid ounces
+ * @warning - DO NOT USE "oz" for fluid ounces. Mass also uses ounces as a unit, so I'd like to seperate 
+ *            "fl oz" for fluid ounces in volume and "oz" for ounces in mass to avoid confusion
+ * @note - extra and not needed for #41
+ * 
+ */
+function volume_from_cc(float $qty, string $end_unit)
     //converting from mililliters to ending unit with division
-
+    switch($end_unit)
+    {
     //if user wants milliliters, no change needed
-    if($endUnit == "mL")   {   return $value;  }
+    case "mL":   
+        return $qty;
+        break;
 
     //milliliters to liters
-    else if($endUnit == "L")        {   return $value/$literRatio;      }
+    case "L"        
+        return $value/$literRatio;    
+        break;
 
     //milliliters to gallons
-    else if($endUnit == "gal")      {   return $value/$gallonRatio;     }
+    case "gal":      
+        return $value/$gallonRatio;     
+        break;
 
     //milliliters to quart 
-    else if($endUnit == "qt")       {   return $value/$quartRatio;      }
+    case "qt":       
+        return $value/$quartRatio;      
+        break;
 
     // milliliters to pint 
-    else if($endUnit == "pt")       {   return $value/$pintRatio;       }
+    case "pt":       
+        return $value/$pintRatio;     
+        break;
 
     // milliliters to cup  
-    else if($endUnit == "cup")      {   return $value/$cupRatio;        }
+    case "cup":      
+        return $value/$cupRatio;        
+        break;
 
     //milliliters to ounces         
-    else if($endUnit == "fl oz")    {   return $value/$fluidOZRatio;    }
+    case "fl oz":   
+        return $value/$fluidOZRatio;    
+        break;
 
     //milliliters to tablespoon 
-    else if($endUnit == "tbsp")     {   return $value/$tbspRatio;       }
+    case "tbsp":     
+        return $value/$tbspRatio;       
+        break;
 
     //milliliters to teaspoons  
-    else if($endUnit == "tsp")      {   return $value/$tspRatio;        }
+    case "tsp":
+        return $value/$tspRatio;        
+        break;
 
     //invalid ending unit
-    else    {   echo "ending unit not found";   return -1;  }
+    default: 
+        echo "unit not found";   
+        return -1;  
+    }
 }
 
 
@@ -182,8 +236,8 @@ function convertVolume(float $qty, string $beginUnit, string $endUnit)
  * 
  * @author z1868762
  * @param qty - the amount of the beginning unit that needs to be converted
- * @param beginUnit - the symbol unit before converting
- * @param endUnit - the symbol unit after converting
+ * @param $begin_unit - the symbol unit before converting
+ * @param $end_unit - the symbol unit after converting
  * @return float - the quantity of the end unit after conversion. Returns -1 on error
  * @example - convertMass(100,"kg" , "lb"); - Converts 100 kilograms into pounds
  * @example - convertMass(15, "oz", "g"); - Converts 15 ounces into grams
@@ -192,23 +246,23 @@ function convertVolume(float $qty, string $beginUnit, string $endUnit)
  * @see "Project Issue #41"
  * 
  */
-function convertMass(float $qty, string $beginUnit, string $endUnit)
+function convertMass(float $qty, string $begin_unit, string $end_unit)
 {
     $poundRatio = 453.592;
     $ounceRatio = 28.3495;
     $kilogramRatio = 1000;
 
     //no need to convert if the beginning unit is grams
-    if($beginUnit == "g")   {   $value = $qty;  }
+    if($begin_unit == "g")   {   $value = $qty;  }
 
     //pounds to grams
-    else if($beginUnit == "lb")     {   $value = $qty * $poundRatio;     }        
+    else if($begin_unit == "lb")     {   $value = $qty * $poundRatio;     }        
     
     //ounces to grams
-    else if($beginUnit == "oz")     {   $value = $qty * $ounceRatio;     }
+    else if($begin_unit == "oz")     {   $value = $qty * $ounceRatio;     }
 
     //kilogram to grams
-    else if($beginUnit == "kg")     {   $value = $qty * $kilogramRatio;  }
+    else if($begin_unit == "kg")     {   $value = $qty * $kilogramRatio;  }
 
     //beginning unit is not found
     else    {   echo "beginning unit not found"; return -1;     }
@@ -217,16 +271,16 @@ function convertMass(float $qty, string $beginUnit, string $endUnit)
     //dividing the units into the end unit
 
     //no changes needed if already in grams
-    if($endUnit == "g")     {   return $value;   }
+    if($end_unit == "g")     {   return $value;   }
 
     //grams to pounds
-    else if($endUnit == "lb")       {   return $value/$poundRatio;      }   
+    else if($end_unit == "lb")       {   return $value/$poundRatio;      }   
 
     //grams to ounces
-    else if($endUnit == "oz")       {   return $value/$ounceRatio;      }
+    else if($end_unit == "oz")       {   return $value/$ounceRatio;      }
 
     //grams to kilograms
-    else if($endUnit == "kg")       {   return $value/$kilogramRatio;   }
+    else if($end_unit == "kg")       {   return $value/$kilogramRatio;   }
 
     //ending unit not found
     else    {   echo "ending unit not found";    return -1;      }
