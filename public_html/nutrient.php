@@ -8,7 +8,6 @@ error_reporting(E_ALL);
 // Includes
 include_once '../src/db.php';
 include_once '../src/library.php';
-include_once '../src/convert.php';              //convert class functions needed
 //make sure user is login   
 session_start();
 $home = (isset($_SERVER['HTTPS']) ? 'https://' : 'http://') .  $_SERVER['SERVER_NAME'] . dirname($_SERVER['REQUEST_URI']);
@@ -34,54 +33,8 @@ if(isset($_POST['nutrient']) && isset($_POST['amount']) && isset($_POST['unit'])
     }
 }
 
-
-
 // Start writing the page
-$page_title = "Fitness Tracker &rsaquo; My Account";
-$style = <<<CSS
-#warning {
-    color: #aa3333;
-}
-/* the following css is for the password validation and message implementation
-    here is the source: https://www.w3schools.com/howto/howto_js_password_validation.asp */ 
-
-/* The message box is shown when the user clicks on the password field */
-#message {
-  display:none;
-  background: #f1f1f1;
-  color: #000;
-  position: relative;
-  padding: 20px;
-  margin-top: 10px;
-}
-
-#message p {
-  padding: 2px 10px 2px 10px;
-  text-align: left;
-}
-
-/* Add a green text color and a checkmark when the requirements are right */
-.valid {
-  color: green;
-}
-
-.valid:before {
-  position: relative;
-  left: -35px;
-  content: "✔";
-}
-
-/* Add a red text color and an "x" icon when the requirements are wrong */
-.invalid {
-  color: red;
-}
-
-.invalid:before {
-  position: relative;
-  left: -35px;
-  content: "✖";
-}
-CSS;
+$page_title = "Fitness Tracker &rsaquo; Add Nutrient";
 include '../templates/header.php';
 ?>
     <!-- Page Content -->
