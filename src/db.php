@@ -277,6 +277,60 @@ class DB {
     }
 
     /**
+     * Get a user's info from the database
+     * 
+     * @author @zgjs
+     * @param id The user's ID
+     * @return array
+     * @example get_user(1); // returns ['username' => 'alice', 'first_name' => 'Alice', 'last_name' => 'Anderson']
+     */
+    function get_user(int $id) {
+        return $this->query('SELECT username, first_name, last_name FROM user WHERE id = ?', [$id])->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Update a user in the database
+     * 
+     * @author @zgjs
+     * @param id The user's ID
+     * @param username The user's login name
+     * @param password The user's login password
+     * @param first_name The user's given name
+     * @param last_name The user's surname
+     * @return bool True on success
+     * @example update_user(1, "alice", "plain password", "Alice", "Anderson")
+     * @see "Project issue #54"
+     */
+    function update_user(int $id, ?string $username = null, ?string $password = null, ?string $first_name = null, ?string $last_name = null): ?bool {
+        if(is_null($username) && is_null($password) && is_null($first_name) && is_null($last_name))
+            return false;
+        $sql_ = [];
+        $params = [];
+        $user = $this->get_user($id);
+        if(!is_null($username) && strlen($username) >= 3 && $username != $user['username'] && $this->get_user_id($username) == 0) {
+            $sql_[] = 'username = :username';
+            $params['username'] = $username;
+        }
+        if(!is_null($password) && strlen($password) >= 8) {
+            $sql_[] = 'password = :password';
+            $params['password'] = password_hash($password, PASSWORD_DEFAULT);
+        }
+        if(!is_null($first_name) && strlen($first_name) >= 2) {
+            $sql_[] = 'first_name = :first_name';
+            $params['first_name'] = $first_name;
+        }
+        if(!is_null($last_name) && strlen($last_name) >= 2) {
+            $sql_[] = 'last_name = :last_name';
+            $params['last_name'] = $last_name;
+        }
+        if(empty($params))
+            return false;
+        $sql = 'UPDATE user SET ' . implode(', ', $sql_) . ' WHERE id = :id';
+        $params['id'] = $id;
+        return (bool) $this->query($sql, $params)->rowCount();
+    }
+
+    /**
      * Add a new workout_type to the database
      * 
      * @param mets_value the coefficient to calculate calories
