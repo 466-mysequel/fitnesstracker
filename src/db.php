@@ -204,22 +204,24 @@ class DB {
         $stmt->execute();
         $food_id = $this->pdo->lastInsertId();
 
-        // Prepare macronutrient insert statement (if provided)
-        if( (!is_null($macro_id) || !empty($macro_id)) && (!is_null($macro_g) || !empty($macro_g)) ) {
-            $sql = "INSERT INTO macronutrient_content(food_id,nutrient_id,amount) VALUES (?,?,?)";
-            $stmt = $this->pdo->prepare($sql);   
-            // for each macronutrient execute prepared statement
-            for( $i = 0; $i < count($macro_id); $i++) {
-                $stmt->execute([$food_id, $macro_id[$i], $macro_g[$i]]);
+        if($food_id > 0) {
+            // Prepare macronutrient insert statement (if provided)
+            if( (!is_null($macro_id) || !empty($macro_id)) && (!is_null($macro_g) || !empty($macro_g)) ) {
+                $sql = "INSERT INTO macronutrient_content(food_id,nutrient_id,amount) VALUES (?,?,?)";
+                $stmt = $this->pdo->prepare($sql);   
+                // for each macronutrient execute prepared statement
+                for( $i = 0; $i < count($macro_id); $i++) {
+                    $stmt->execute([$food_id, $macro_id[$i], $macro_g[$i]]);
+                }
             }
-        }
-        // Prepare micronutrient insert statement (if provided)
-        if( (!is_null($micro_id) || !empty($micro_id)) && (!is_null($micro_dv) || !empty($micro_dv)) ) {
-            $sql = "INSERT INTO micronutrient_content(food_id,nutrient_id,percent_dv) VALUES (?,?,?)";
-            $stmt = $this->pdo->prepare($sql);   
-            // for each micronutrient execute prepared statement
-            for( $i = 0; $i < count($micro_id); $i++) {
-                $stmt->execute([$food_id, $micro_id[$i], $micro_dv[$i]]);
+            // Prepare micronutrient insert statement (if provided)
+            if( (!is_null($micro_id) || !empty($micro_id)) && (!is_null($micro_dv) || !empty($micro_dv)) ) {
+                $sql = "INSERT INTO micronutrient_content(food_id,nutrient_id,percent_dv) VALUES (?,?,?)";
+                $stmt = $this->pdo->prepare($sql);   
+                // for each micronutrient execute prepared statement
+                for( $i = 0; $i < count($micro_id); $i++) {
+                    $stmt->execute([$food_id, $micro_id[$i], $micro_dv[$i]]);
+                }
             }
         }
         return $food_id;
