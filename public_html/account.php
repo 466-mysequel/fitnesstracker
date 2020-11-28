@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 // Includes
 include_once '../src/db.php';
 include_once '../src/library.php';
-
+include_once '../src/convert.php';              //convert class functions needed
 //make sure user is login   
 session_start();
 $home = (isset($_SERVER['HTTPS']) ? 'https://' : 'http://') .  $_SERVER['SERVER_NAME'] . dirname($_SERVER['REQUEST_URI']);
@@ -25,6 +25,27 @@ if(isset($_POST['first_name']) && isset($_POST['last_name']) && isset($_POST['us
     $update_result = $db->update_user($_SESSION['user_id'], $_POST['username'], $_POST['password'], $_POST['first_name'], $_POST['last_name']);
     if($update_result) $user = $db->get_user($_SESSION['user_id']);
 }
+
+if(isset($_POST['weight'])) {
+    //converting the weight string into an integer
+    $a = $_POST['weight'];
+    $a = +$a;                       
+    //converting in case the unit is in lb                  
+    if($_POST['unit'] == "lb" )    
+    {
+        $grams = convert::mass_to_g($a, "lb");
+        $kilograms = convert :: mass_from_g($grams, "kg");
+        $db->log_weight($_SESSION['user_id'],$kilograms);
+    }
+    //execute log_weight if unit is already in kg
+    else
+    {
+        $db->log_weight($_SESSION['user_id'],$a);
+    }
+    //echo "<p> Weight Updated Successfully </p>";
+}
+
+
 
 // Start writing the page
 $page_title = "Fitness Tracker &rsaquo; My Account";
