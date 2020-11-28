@@ -10,12 +10,12 @@ if(isset($_POST['servername']) && isset($_POST['dbname']) && isset($_POST['usern
         if(isset($_POST['runsqlscripts']) && $_POST['runsqlscripts'] == 1) {
             // Clean up the SQL files before running them. Remove comments and script echos.
             $sql = "";
-            foreach(explode("\n",file_get_contents('../sql/tables.sql') . file_get_contents('../sql/sampledata.sql')) as $line) {
+            foreach(explode("\n",file_get_contents('../sql/tables.sql') . file_get_contents('../sql/views.sql') . file_get_contents('../sql/sampledata.sql')) as $line) {
                 if(!(preg_match('/^[#\\\\]/', $line))) {
                     $sql .= preg_replace('/#.*$/', '', $line) . "\n";
                 }
             }
-            echo "<p class=\"lead\">Recreated tables and inserted sample data.</p>\n";
+            echo "<p class=\"lead\">[Re]created tables, views, and sample data.</p>\n";
         }
         $config = <<<PHP
         <?php
