@@ -27,22 +27,28 @@ if(isset($_POST['first_name']) && isset($_POST['last_name']) && isset($_POST['us
 }
 
 if(isset($_POST['weight'])) {
-    //converting the weight string into an integer
-    $a = $_POST['weight'];
-    $a = +$a;                       
-    //converting in case the unit is in lb                  
-    if($_POST['unit'] == "lb" )    
-    {
-        $grams = convert::mass_to_g($a, "lb");
-        $kilograms = convert :: mass_from_g($grams, "kg");
-        $db->log_weight($_SESSION['user_id'],$kilograms);
+    if(!empty($_POST['weight'])){
+        //converting the weight string into an integer
+        $a = $_POST['weight'];
+        $a = +$a;                       
+        //converting in case the unit is in lb                  
+        if($_POST['unit'] == "lb" )    
+        {
+            $grams = convert::mass_to_g($a, "lb");
+            $kilograms = convert :: mass_from_g($grams, "kg");
+            $db->log_weight($_SESSION['user_id'],$kilograms);
+        }
+        //execute log_weight if unit is already in kg
+        else
+        {
+            $db->log_weight($_SESSION['user_id'],$a);
+        }
+        $update_weight = true;
+        //echo "<p> Weight Updated Successfully </p>";
     }
-    //execute log_weight if unit is already in kg
-    else
-    {
-        $db->log_weight($_SESSION['user_id'],$a);
+    else {
+        $update_weight = false;
     }
-    //echo "<p> Weight Updated Successfully </p>";
 }
 
 
@@ -195,6 +201,7 @@ include '../templates/header.php';
             </div>
             <div class="col-6">
                 <p class="lead">Update your weight</p>
+                <?php if(isset($update_weight)) echo $update_weight ? "<p style=\"color: #33aa33\">Weight sucessfully updated</p>\n" : "<p style=\"color: #aa3333\">Weight unsuccessfully updated</p>\n"; ?>
                 <form method="POST" class="form-inline">
                     <label for="weight" class="sr-only">Weight</label>
                     <input type="text" id="weight" name="weight" class="form-control" placeholder="Weight">
