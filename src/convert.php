@@ -43,6 +43,8 @@ class convert
     private static $poundRatio = 453.592;
     private static $ounceRatio = 28.3495;
     private static $kilogramRatio = 1000;
+    private static $mgRatio = .001;
+    private static $mcgRatio .000001;
     /**
      * Convert from one unit of volume to another
      * 
@@ -131,12 +133,18 @@ class convert
             case "g":      
                 return $qty;  
                 break;
-
+            //miligrams to grams
+            case "mg":
+                return $qty * self::$mgRatio;
+                break;
+            //micrograms to grams
+            case "mcg":
+                return $qty * self::$mcgRatio;
+                break;
             //pounds to grams
             case "lb":     
                 return $qty * self::$poundRatio;     
                 break;    
-        
             //ounces to grams
             case "oz":     
                 return $qty * self::$ounceRatio;     
@@ -254,12 +262,18 @@ class convert
             case "g":     
                 return $qty;   
                 break;
-
+            //grams to milligrams
+            case "mg":
+                return $qty/self::$mgRatio;
+                break;
+            //grams to micrograms
+            case "mcg":
+                return $qty/self::$mcgRatio;
+                break;
             //grams to pounds
             case "lb":       
                 return $qty/self::$poundRatio;   
                 break;      
-
             //grams to ounces
             case "oz":      
                 return $qty/self::$ounceRatio;      
