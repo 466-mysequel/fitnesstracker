@@ -34,14 +34,13 @@ if(isset($_POST['weight'])) {
         //converting in case the unit is in lb                  
         if($_POST['unit'] == "lb" )    
         {
-            $grams = convert::mass_to_g($a, "lb");
-            $kilograms = convert :: mass_from_g($grams, "kg");
-            $db->log_weight($_SESSION['user_id'],$kilograms);
+            $kilograms = convert::mass_from_g(convert::mass_to_g($a, "lb"), "kg");
+            $db->log_weight($_SESSION['user_id'], $kilograms);
         }
         //execute log_weight if unit is already in kg
         else
         {
-            $db->log_weight($_SESSION['user_id'],$a);
+            $db->log_weight($_SESSION['user_id'], $a);
         }
         $update_weight = true;
         //echo "<p> Weight Updated Successfully </p>";
