@@ -21,6 +21,9 @@ PHPCONFIG
 mysql -h $servername -u $username -p$password -D $dbname < sql/tables.sql \
     && echo -e "\033[0;32mCreated tables\033[0m" \
     || echo -e "\033[0;31mProblem creating tables\033[0m"
+mysql -h $servername -u $username -p$password -D $dbname < sql/views.sql \
+    && echo -e "\033[0;32mCreated views\033[0m" \
+    || echo -e "\033[0;31mProblem creating views\033[0m"
 mysql -h $servername -u $username -p$password -D $dbname < sql/sampledata.sql \
     && echo -e "\033[0;32mInserted sample data\033[0m" \
     || echo -e "\033[0;31mProblem inserting sample data\033[0m"

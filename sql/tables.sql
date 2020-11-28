@@ -1,5 +1,7 @@
 # Cleanup:
-\! echo "Dropping tables if they exist..."
+\! echo "Dropping tables and views if they exist..."
+DROP VIEW IF EXISTS net_calories_per_day, calories_in_per_day, calories_out_per_day, current_weight, workout_calories_burned;
+DROP FUNCTION IF EXISTS WEIGHT_AT_TIME;
 DROP TABLE IF EXISTS food_log,workout_log,weight_log,macronutrient_content,micronutrient_content,food,nutrient,workout_type,user;
 # Entities: 
 \! echo "Creating entity tables:"
