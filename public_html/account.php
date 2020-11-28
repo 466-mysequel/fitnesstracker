@@ -26,24 +26,11 @@ $db = new DB();
     <main role="main" class="container">
         <div class="row">
           <?php
-            $sql = "SELECT DISTINCT first_name, last_name FROM user WHERE id = 5";
-            $stmt = $db->query($sql);
-            $allRows = $stmt ->fetchAll(PDO:: FETCH_ASSOC);
-            $fullName = array();
-            $count =0;
-            foreach($allRows as $row)
-            {
-                echo "<tr>";
-                foreach($row as $item)
-                {
-                    $fullName[$count] = $item;
-                    $count += 1;
-                }
-            } echo "</tr>";
-            echo $_POST['username'];
+            $sql = "SELECT  first_name, last_name,username FROM user WHERE id = ?";
+            $stmt = $db->query($sql,[$_SESSION['user_id']]);
+            $user = $stmt ->fetch(PDO:: FETCH_ASSOC);
           ?>
-          <h1> Hello
-          <?php foreach($fullName as $name) { echo"$name "; } ?>
+          <h1> Hello <?php  echo "{$user['first_name']}  {$user['last_name']} ";  ?>
           </h1>
         </div>
     </main>
