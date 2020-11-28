@@ -156,8 +156,10 @@ class DB {
      * @param calories_per_serving The number of calories contained in one serving of this food
      * @param serving_size_grams The mass of one serving in grams
      * @param serving_size_cc The volume of one serving in cubic centimeters or milliliters if known. Otherwise null.
-     * @param macronutrients An optional array of macronutrients and their mass, eg. [2 => 3.5, 5 => 1.0]
-     * @param micronutrients An optional array of micronutrients and their percent daily value, eg. [20 => 5, 12 => 15]
+     * @param macro_id An optional array of macronutrient ids
+     * @param macro_g An optional array of macronutrient grams
+     * @param macro_id An optional array of micronutrient ids
+     * @param macro_dv An optional array of mincronutrient daily values
      * @return int the ID of the new food
      * @example add_food("tuna sandwich", "solid", "one sandwich", 250, null, [2 => 3.5, 5 => 1.0], [20 => 5, 12 => 15])
      * @see "Project issue #26"
@@ -169,49 +171,55 @@ class DB {
         int $calories_per_serving,
         int $serving_size_grams,
         ?int $serving_size_cc = null,
-        ?array $macronutrients = null,
-        ?array $micronutrients = null
-    ): int
+        ?array $macro_id = null,
+        ?array $macro_g = null,
+        ?array $micro_id = null,
+        ?array $micro_dv = null
+    ) :int
     {
+        // check if food already exists
+        $sql = "SELECT count(*) FROM food WHERE name = ?";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$name]);
+        $count = $stmt->fetchColumn();
+        
+        if($count != 0) {
+            // food exists
+            return -2;
+        }
         // Prepare food insert statement
-        if(is_set($serving_size_cc) || !empty($serving_size_cc))
+        if(!is_null($serving_size_cc))
             $sql = "INSERT INTO food(name,type,serving_size_friendly,calories_per_serving,serving_size_grams,serving_size_cc) VALUES (:name,:type,:serving_size_friendly,:calories_per_serving,:serving_size_grams,:serving_size_cc)";
         else
             $sql = "INSERT INTO food(name,type,serving_size_friendly,calories_per_serving,serving_size_grams) VALUES (:name,:type,:serving_size_friendly,:calories_per_serving,:serving_size_grams)";
-        $this->pdo->query($sql);
-        $this->pdo->bindParam(':name', $name);
-        $this->pdo->bindParam(':type', $type);
-        $this->pdo->bindParam(':serving_size_friendly', $serving_size_friendly);
-        $this->pdo->bindParam(':calories_per_serving',$calories_per_serving);
-        $this->pdo->bindParam(':serving_size_grams', $serving_size_grams);
-        if(is_set($serving_size_cc) || !empty($serving_size_cc))
-            $this->pdo->bindParam(':serving_size_cc', $serving_size_cc);
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':type', $type);
+        $stmt->bindParam(':serving_size_friendly', $serving_size_friendly);
+        $stmt->bindParam(':calories_per_serving',$calories_per_serving);
+        $stmt->bindParam(':serving_size_grams', $serving_size_grams);
+        if(!is_null($serving_size_cc))
+            $stmt->bindParam(':serving_size_cc', $serving_size_cc);
         // Execute food insert statement
-        $this->pdo->execute();
+        $stmt->execute();
         $food_id = $this->pdo->lastInsertId();
 
-        // Prepare macronutrient insert statement
-        if(is_set($macronutrients) || !empty($macronutrients)) {
-            $sql = "INSERT INTO macronutrient_content(food_id,nutrient_id,amount) VALUES (:food_id,:nutrient_id,:amount)";
-            $this->pdo->query($sql);   
-            // for each macrnutrient as macronutrients, execute prepared statement
-            foreach($macronutrients as $macronutrient) {
-                $this->pdo->bindParam(':food_id', $food_id); // food_id from the line 191
-                $this->pdo->bindParam(':nutrient_id', $macronutrient['nutrient_id']);
-                $this->pdo->bindParam(':amount', $macronutrient['amount']);
-                $this->pdo->execute();
+        // Prepare macronutrient insert statement (if provided)
+        if( (!is_null($macro_id) || !empty($macro_id)) && (!is_null($macro_g) || !empty($macro_g)) ) {
+            $sql = "INSERT INTO macronutrient_content(food_id,nutrient_id,amount) VALUES (?,?,?)";
+            $stmt = $this->pdo->prepare($sql);   
+            // for each macronutrient execute prepared statement
+            for( $i = 0; $i < count($macro_id); $i++) {
+                $stmt->execute([$food_id, $macro_id[$i], $macro_g[$i]]);
             }
         }
-        // Prepare micronutrient insert statement
-        if(is_set($micronutrients) || !empty($micronutrients)) {
-            $sql = "INSERT INTO micronutrient_content(food_id,nutrient_id,percent_dv) VALUES (:food_id,:nutrient_id,:percent_dv)";
-            $this->pdo->query($sql);   
-            // for each micronutrient as micronutrients, execute prepared statement
-            foreach($micronutrients as $micronutrient){
-                $this->pdo->bindParam(':food_id', $food_id); // food_id from the line 191
-                $this->pdo->bindParam(':nutrient_id', $micronutrient['nutrient_id']);
-                $this->pdo->bindParam(':percent_dv', $micronutrient['percent_dv']);
-                $this->pdo->execute();
+        // Prepare micronutrient insert statement (if provided)
+        if( (!is_null($micro_id) || !empty($micro_id)) && (!is_null($micro_dv) || !empty($micro_dv)) ) {
+            $sql = "INSERT INTO micronutrient_content(food_id,nutrient_id,percent_dv) VALUES (?,?,?)";
+            $stmt = $this->pdo->prepare($sql);   
+            // for each micronutrient execute prepared statement
+            for( $i = 0; $i < count($micro_id); $i++) {
+                $stmt->execute([$food_id, $micro_id[$i], $micro_dv[$i]]);
             }
         }
         return $food_id;
