@@ -21,17 +21,12 @@ if(!is_authenticated()) {
 $page_title = "Fitness Tracker &rsaquo; My Account";
 include '../templates/header.php';
 $db = new DB();
+$user = $db->get_user($_SESSION['user_id']);
 ?>
     <!-- Page Content -->
     <main role="main" class="container">
         <div class="row">
-          <?php
-            $sql = "SELECT  first_name, last_name,username FROM user WHERE id = ?";
-            $stmt = $db->query($sql,[$_SESSION['user_id']]);
-            $user = $stmt ->fetch(PDO:: FETCH_ASSOC);
-          ?>
-          <h1> Hello <?php  echo "{$user['first_name']}  {$user['last_name']} ";  ?>
-          </h1>
+            <h1>Hello <?php echo $user['first_name'] . ' ' . $user['last_name']; ?></h1>
         </div>
     </main>
 <?php include '../templates/footer.php'; ?>
