@@ -25,7 +25,26 @@ $db = new DB();
     <!-- Page Content -->
     <main role="main" class="container">
         <div class="row">
-          <p>Hello World </p>
+          <?php
+            $sql = "SELECT DISTINCT first_name, last_name FROM user WHERE id = 5";
+            $stmt = $db->query($sql);
+            $allRows = $stmt ->fetchAll(PDO:: FETCH_ASSOC);
+            $fullName = array();
+            $count =0;
+            foreach($allRows as $row)
+            {
+                echo "<tr>";
+                foreach($row as $item)
+                {
+                    $fullName[$count] = $item;
+                    $count += 1;
+                }
+            } echo "</tr>";
+            echo $_POST['username'];
+          ?>
+          <h1> Hello
+          <?php foreach($fullName as $name) { echo"$name "; } ?>
+          </h1>
         </div>
     </main>
 <?php include '../templates/footer.php'; ?>
