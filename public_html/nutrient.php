@@ -20,11 +20,7 @@ $db = new DB();
 if(isset($_POST['nutrient']) && isset($_POST['amount']) && isset($_POST['unit'])) {
     if(!empty($_POST['nutrient']) && !empty($_POST['amount']) && !empty($_POST['unit']))
     {  
-        //turns post amount into an integer
-        $a = $_POST['amount'];
-        $a = +$a;
-        $id = $db->add_nutrient($_POST['nutrient'],$a, $_POST['unit']);
-        $update_nutrient = true;
+        $update_nutrient = (bool) $db->add_nutrient($_POST['nutrient'], (float) $_POST['amount'], $_POST['unit']);
     }
     //if there is an invalid entry will print that the nutrient was unsuccessfully added
     else 
