@@ -25,7 +25,9 @@ if(isset($_POST['first_name']) && isset($_POST['last_name']) && isset($_POST['us
         $result = $db->add_user($_POST['username'],$_POST['password'],$_POST['first_name'],$_POST['last_name']);
         if($result > 0) {
             header("Location: $home/account.php", true, 303);
-            session_start();
+            if (session_status() == PHP_SESSION_NONE) {
+                session_start();
+            }
             $_SESSION['auth_status'] = true;
             $_SESSION['user_id'] = $result;
             die ("<html><body>Successfully signed up. <a href=\"account.php\">Click here if your are not redirected automatically.</a></body></html>\n");
