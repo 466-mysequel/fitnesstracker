@@ -422,7 +422,7 @@ class DB {
         $names = array();
         $rows = $this->query($sql, ["%$search%"])->fetchAll(PDO::FETCH_ASSOC);
         foreach($rows as $row) {
-            $names[$row['id']] = $row['name'];
+            $names[$row['id']] = $row['activity'];
         }
         return $names;
     }
