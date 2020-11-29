@@ -73,7 +73,7 @@ if(isset($_GET['action'])):
         <div class="col-6">
                 <p class="lead">Enter Workout info</p>
                 <?php if(isset($update_workout)) echo $update_workout ? "<p style=\"color: #33aa33\">Workout sucessfully updated</p>\n" : "<p style=\"color: #aa3333\">Workout unsuccessfully updated</p>\n"; ?>
-                <form method="POST" class="form-inline">
+                <form method="POST" >
                 <label for="Workout" class="sr-only">Workout</label>
                     <input type="text" id="activity" name="activity" class="form-control" placeholder="Workout Name">
                     <label for="Workout" class="sr-only">Mets Value</label>
