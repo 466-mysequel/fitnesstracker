@@ -504,6 +504,51 @@ class DB {
     }
 
     /**
+
+     * To get the macro percentages from the macro totals view
+     * 
+     * @author @z1868762 @HR0102 @zgjs
+     * @param user_id - The user's ID 
+     * @param period - Today, Weekly, Monthly
+     * @return array 
+     * @example get_macro_calories(5, "today");
+     * @example get_macro_calories(3, "weekly");
+     * @example get_macro_calories(2, "monthly");
+     * @see "Project Issue #29"
+     * @see https://www.nal.usda.gov/fnic/how-many-calories-are-one-gram-fat-carbohydrate-or-protein
+     */
+    function get_macro_calories(int $user_id, string $period) : array
+    {
+        $views = ['today' => 'macro_totals_today', 
+                  'monthly' => 'macro_totals_monthly', 
+                  'weekly' => 'macro_totals_weekly'];
+        $macro = ['fat' => '1',
+                  'carbs' => '4',
+                  'fiber' => '6',
+                  'protein' => '7'];
+        $sql = 'SELECT nutrient_id, macro_total_g FROM ' . $views[$period] . ' WHERE user_id = ?';
+        $rows = $this->query($sql, [$user_id])->fetchAll(PDO::FETCH_ASSOC);
+        $macro_calories = [];
+        foreach($rows as $row)
+        {
+            switch($row['nutrient_id'])
+            {
+                case $macro['fat']:
+                    $macro_calories['fat'] = $row['macro_total_g'] * 9;
+                    break;
+                case $macro['carbs']:
+                    $macro_calories['carbs'] = $row['macro_total_g'] * 4;
+                    break;
+                case $macro['fiber']:
+                    $macro_calories['fiber'] = $row['macro_total_g'] * 2;
+                    break;
+                case $macro['protein']:
+                    $macro_calories['protein'] = $row['macro_total_g'] * 4;
+                    break;
+            }
+        }
+        return $macro_calories;
+    }
      * Fetch all macronutrients from the database
      * 
      * @return array an array of macronutrient IDs and Names
