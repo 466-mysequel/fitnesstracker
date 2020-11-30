@@ -4,8 +4,10 @@ ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
 include_once '../src/db.php';
+$db = new DB();
 include_once '../src/library.php'; 
 $page_title = "Fitness Tracker &rsaquo; Meals Page";
+
 include_once '../templates/header.php';
 ?>
     <!-- Page Content -->
@@ -47,7 +49,52 @@ if(isset($_GET['action'])):
         </div>
 <?php   break;
         case 'new': ?>
-        <h2>Create a new food</h2>
+
+<?php if(isset($_POST['name']) && isset($_POST['type']) && isset($_POST['serving_size_friendly']) && isset($_POST['calories_per_serving']) && isset($_POST['serving_size_grams'])) {
+    $return = $db->add_food($_POST['name'],$_POST['type'],$_POST['serving_size_friendly'],(int)$_POST['calories_per_serving'],(int)$_POST['serving_size_grams'],(int)$_POST['serving_size_cc'],$_POST['macro_id'],$_POST['macro_g'],$_POST['micro_id'],$_POST['micro_dv']);
+    if($return == 0){
+        echo "<h1>Unable to add food.</h1>";
+    }
+} ?>
+<form method="POST">
+<br>
+    <div class="row">
+        <div class="col">
+            <h2>Create a new food</h2>
+            <label for="name" >Name</label>
+            <input type="text" id="name" name="name" class="form-control" placeholder="egg">
+            <label for="type" >Type</label>
+            <select id="type" name="type" class="form-control">
+                <option value="solid">Solid</option>
+                <option value="liquid">Liquid</option>
+            </select>
+            <label for="serving_size_friendly" >Serving Size</label>
+            <input type="text" id="serving_size_friendly" name="serving_size_friendly" class="form-control" placeholder="i.e., 1 egg">
+            <label for="calories" >Calories Per Serving</label>
+            <input type="number" id="calories" name="calories_per_serving" class="form-control" placeholder="100">
+            <label for="serving_size_grams" >Serving Size (g)</label>
+            <input type="number" id="serving_size_grams" name="serving_size_grams" class="form-control" placeholder="50">
+            <label for="serving_size_cc" >Serving Size (cc)</label>
+            <input type="number" id="serving_size_cc" name="serving_size_cc" class="form-control" placeholder="optional">
+        </div>
+        <div class="col">    
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+            <div class="macros">
+                <h3>Macronutrients</h3>
+                <button class="add-macros">Add Macro &nbsp; 
+                <span style="font-size:16px; font-weight:bold;">+ </span>
+                </button>
+            </div>
+            <div class="micros">
+                <h3>Micronutrients</h3>
+                <button class="add-micros">Add Micro &nbsp; 
+                <span style="font-size:16px; font-weight:bold;">+ </span>
+                </button>
+            </div>
+            <button class="btn btn-lg btn-primary" type="submit">Add Food</button>
+        </div>        
+    </div>
+</form>
 <?php   break;
         endswitch; ?>
 <?php else: ?>
@@ -65,4 +112,77 @@ if(isset($_GET['action'])):
 
 <?php endif; ?>
     </main>
+    <script type='text/javascript'>
+    $(document).ready(function() {
+        <?php 
+            $nutrients = $db->get_macronutrients();
+        ?>
+        var max_macros = 4;
+        var wrapper = $(".macros");
+        var add_macros = $(".add-macros");
+        let option_ids = new Array();
+        let option_names = new Array();
+        <?php foreach($nutrients as $key => $value) { ?>;
+            option_ids.push('<?php echo $value['id']; ?>');
+            option_names.push('<?php echo $value['name']; ?>');
+        <?php } ?>;
+        let x = 0;
+        $(add_macros).click(function(e) {
+            e.preventDefault();
+            if (x < option_ids.length) {
+                x++;
+                var html = `<div><select name="macro_id[]">`;
+                for(var i = 0; i < option_ids.length; i++){
+                    html = html.concat(`<option value=${option_ids[i]}>${option_names[i]}</option>`);
+                }   
+                html = html.concat(`</select><input type="number" name="macro_g[]" style="width:3em"/>grams <a href="#" class="delete-macro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
+                $(wrapper).append(html); //add input box
+            } else {
+                alert('No more macronutrients available')
+            }
+        });
+
+        $(wrapper).on("click", ".delete-macro", function(e) {
+            e.preventDefault();
+            $(this).parent('div').remove();
+            x--;
+        })
+    });
+
+    $(document).ready(function() {
+        <?php 
+            $nutrients = $db->get_micronutrients();
+        ?>
+        var max_micros = 40;
+        var wrapper = $(".micros");
+        var add_micros = $(".add-micros");
+        let option_ids = new Array();
+        let option_names = new Array();
+        <?php foreach($nutrients as $key => $value) { ?>;
+            option_ids.push('<?php echo $value['id']; ?>');
+            option_names.push('<?php echo $value['name']; ?>');
+        <?php } ?>;
+        let x = 0;
+        $(add_micros).click(function(e) {
+            e.preventDefault();
+            if (x < option_ids.length) {
+                x++;
+                var html = `<div><select name="micro_id[]">`;
+                for(var i = 0; i < option_ids.length; i++){
+                    html = html.concat(`<option value=${option_ids[i]}>${option_names[i]}</option>`);
+                }   
+                html = html.concat(`</select><input type="number" name="micro_dv[]" style="width:3em"/>% <a href="#" class="delete-micro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
+                $(wrapper).append(html); //add input box
+            } else {
+                alert('No more micronutrients available')
+            }
+        });
+
+        $(wrapper).on("click", ".delete-micro", function(e) {
+            e.preventDefault();
+            $(this).parent('div').remove();
+            x--;
+        })
+    });
+    </script>
 <?php include_once '../templates/footer.php';

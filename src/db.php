@@ -492,5 +492,33 @@ class DB {
         $pdo = $this -> query($sql, [$user_id, $workout_type_id, $duration_secs]);
         return;
     }
+
+    /**
+     * Fetch all macronutrients from the database
+     * 
+     * @return array an array of macronutrient IDs and Names
+     * @example $array_result = get_macronutrients()
+     * @see "Project issue #2336"
+     */
+    function get_macronutrients() :array {
+        $sql = "SELECT id,name FROM nutrient WHERE id IN(1,4,6,7)";
+        $stmt = $this->query($sql);
+        $array_results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $array_results;
+    }
+
+    /**
+     * Fetch all micronutrients from the database
+     * 
+     * @return array an array of micronutrient IDs and Names
+     * @example $array_result = get_micronutrients()
+     * @see "Project issue #2336"
+     */
+    function get_micronutrients() :array {
+        $sql = "SELECT id,name FROM nutrient WHERE id NOT IN(1,4,6,7)";
+        $stmt = $this->query($sql);
+        $array_results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $array_results;
+    }
 }
 ?>
