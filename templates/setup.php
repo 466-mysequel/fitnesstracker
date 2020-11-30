@@ -11,11 +11,12 @@ if(isset($_POST['servername']) && isset($_POST['dbname']) && isset($_POST['usern
             // Clean up the SQL files before running them. Remove comments and script echos.
             $sql = "";
             foreach(explode("\n",file_get_contents('../sql/tables.sql') . file_get_contents('../sql/views.sql') . file_get_contents('../sql/sampledata.sql')) as $line) {
-                if(!(preg_match('/^[#\\\\]/', $line))) {
-                    $sql .= preg_replace('/#.*$/', '', $line) . "\n";
+                if(!(preg_match('/^[#\\\\]|^DELIMITER/', $line))) {
+                    $sql .= preg_replace('/^END\$\$/', 'END;', preg_replace('/#.*$/', '', $line)) . "\n";
                 }
             }
-            echo "<p class=\"lead\">[Re]created tables, views, and sample data.</p>\n";
+            $pdo->exec($sql);
+            echo "        <p class=\"lead\">[Re]created tables, views, and sample data.</p>\n";
         }
         $config = <<<PHP
         <?php
@@ -27,12 +28,12 @@ if(isset($_POST['servername']) && isset($_POST['dbname']) && isset($_POST['usern
         ?>
         PHP;
         if(file_put_contents('../config/config.php', $config, LOCK_EX)) {
-            echo "<p class=\"lead\">Config file written successfully.<br>\n<a href=\"index.php\">Home</a></p>\n";
+            echo "        <p class=\"lead\">Config file written successfully.<br>\n        <a href=\"index.php\">Home</a></p>\n";
         } else {
-            echo "<p class=\"lead\">There was a problem writing to <code>config.php</code> file. Create it manually or run <code>setup.sh</code>.</p>\n";
+            echo "        <p class=\"lead\">There was a problem writing to <code>config.php</code> file. Create it manually or run <code>setup.sh</code>.</p>\n";
         }
     } catch (PDOException $e) {
-        echo "<p class=\"lead\">Could not connect to database:<br>\n{$e->getMessage()}<br>\n<a href=\"javascript:window.history.back();\">Back</a></p>";
+        echo "        <p class=\"lead\">Could not connect to database:<br>\n{$e->getMessage()}<br>\n<a href=\"javascript:window.history.back();\">Back</a></p>";
     }
 } elseif (is_writable("../config/") || is_writable("../config/config.php")) {
     $subdomain = explode('.', $_SERVER['HTTP_HOST'])[0];
