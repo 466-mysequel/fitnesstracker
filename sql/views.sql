@@ -85,3 +85,8 @@ WHERE nutrient_id IN(1,4,6,7)
 AND DATE(date) = CURDATE()
 GROUP BY user_id,nutrient_id;
 \! echo " * macro_totals_today"
+# View: Food Totals
+CREATE VIEW total_food_logs AS
+SELECT user_id,food_id,nutrient_id,servings,date FROM food_log
+INNER JOIN macronutrient_content USING (food_id)
+GROUP BY user_id,food_id ORDER BY date ASC;
