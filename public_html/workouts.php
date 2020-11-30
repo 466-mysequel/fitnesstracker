@@ -88,46 +88,36 @@ if(isset($_GET['action'])):
 <?php   break;
         case 'new': ?>
         <h1>Create a new type of workout</h1>
-        <?php
-        $new_workouts = []; 
-        if(isset($_POST['mets_value']) && isset($_POST['category']) && isset($_POST['activity']) && isset($_POST['intensity'])){
-        if(!empty($_POST['mets_value']) && !empty($_POST['category']) && !empty($_POST['activity']) && !empty($_POST['intensity']))
-        {  
-            for($i = 0; $i < count($_POST['mets_value']); $i++){
-                $mets_value = (float)$_POST['mets_value'][$i];
-                $category = htmlspecialchars($_POST['category']);
-                $activity = htmlspecialchars($_POST['activity']);
-                $intensity = htmlspecialchars($_POST['intensity'][$i]);
-                $update_workout =  $db->add_workout_type($mets_value, $category, $activity, $intensity);
-                if($update_workout > 0){
-                    $new_workouts[$update_workout] = $intensity;
-                }
-            }
-            
+<?php
+$new_workouts = [];
+if(isset($_POST['mets_value']) && isset($_POST['category']) && isset($_POST['activity']) && isset($_POST['intensity']) && !empty($_POST['mets_value']) && !empty($_POST['category']) && !empty($_POST['activity']) && !empty($_POST['intensity'])) {
+    $category = htmlspecialchars($_POST['category']);
+    $activity = htmlspecialchars($_POST['activity']);
+    for($i = 0; $i < count($_POST['mets_value']); $i++) {
+        $mets_value = (float)$_POST['mets_value'][$i];
+        $intensity = htmlspecialchars($_POST['intensity'][$i]);
+        $update_workout =  $db->add_workout_type($mets_value, $category, $activity, $intensity);
+        if($update_workout > 0){
+            $new_workouts[$update_workout] = $intensity;
         }
-        //if there is an invalid entry will print that the nutrient was unsuccessfully added
-        else 
-        {
-         $update_workout= false;
-        }
-}?>
+    }
+}
+if (count($new_workouts) > 0) {
+    echo <<<HTML
+            <p class="lead">
+                <span style="color: #33AA33">Successfully added new activity</span>: <a href="workouts.php?action=browse&category=$category">$category</a> &rsaquo; <b><a href="workouts.php?action=browse&activity=$activity">$activity</a></b> (
+    HTML;
+    $links = [];
+    foreach($new_workouts as $id=>$intensity){
+        $links[] = "<a href=\"workouts.php?action=browse&id=$id\">$intensity</a>";
+    }
+    echo implode(", ", $links). ")\n                </p>\n";
+} else {
+    echo "        <p class=\"lead\">Enter Workout info</p>\n";
+}
+?>
         <div class="row">
-        <div class="col-8">
-                <p class="lead">Enter Workout info</p>
-                <?php 
-                    if(isset($update_workout)) { 
-                        if (count($new_workouts) > 0)
-                        {
-                            echo "<p style=\"color: #33AA33\">Successfully added new activity</p>";
-                            echo "<p><a href=\"workouts.php?action=browse&category=$category\">$category</a> &gt; <a href=\"workouts.php?action=browse&activity=$activity\">$activity</a> (";
-                            $links = [];
-                            foreach($new_workouts as $id=>$intensity){
-                                $links[] = "<a href=\"workouts.php?action=browse&id=$id\">$intensity</a>";
-                            }
-                            echo implode(", ", $links). ")</p>";   
-                        }
-                    }
-                ?>
+            <div class="col-8">
                 <form method="POST">
                     <div class="form-row">
                         <div class="form-group col-md-12">
@@ -195,7 +185,7 @@ if(isset($_GET['action'])):
                             </div>
                             <div class="form-group col-md-3">
                                 <label for="mets_value[]" class="sr-only">Mets Value</label>
-                                <input type="number" min="1.0" max="14.0" step="0.1" id="mets_value[]" name="mets_value[]" class="form-control" placeholder="1" required>
+                                <input type="number" min="1" max="25" step="0.1" id="mets_value[]" name="mets_value[]" class="form-control" placeholder="Mets Value" required>
                             </div>
                             <div class="form-group col-md-8">
                                 <label for="intensity[]" class="sr-only">Intensity</label>
@@ -236,5 +226,6 @@ if(isset($_GET['action'])):
             </div>
         </div>
 <?php endif; ?>
+
     </main>
 <?php include '../templates/footer.php'; ?>
