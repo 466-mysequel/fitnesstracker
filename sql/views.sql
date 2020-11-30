@@ -53,8 +53,35 @@ GROUP BY DATE(workout_log.date), user_id;
 CREATE VIEW net_calories_per_day AS
 SELECT `date`,user_id,IFNULL(total_calories_in,0) AS total_calories_in,IFNULL(total_calories_out,0) AS total_calories_out,IFNULL(total_calories_in,0)-IFNULL(total_calories_out,0) AS net_calories FROM calories_in_per_day
 LEFT JOIN calories_out_per_day USING (`date`, user_id)
-UNION 
+UNION
 SELECT `date`,user_id,IFNULL(total_calories_in,0) AS total_calories_in,IFNULL(total_calories_out,0) AS total_calories_out,IFNULL(total_calories_in,0)-IFNULL(total_calories_out,0) AS net_calories FROM calories_in_per_day
 RIGHT JOIN calories_out_per_day USING (`date`, user_id)
 ORDER BY `date`;
 \! echo " * net_calories_per_day"
+# View: Macro totals monthly
+CREATE VIEW macro_totals_monthly AS
+SELECT user_id,nutrient_id,sum(servings*amount) AS macro_total_g
+FROM food_log
+INNER JOIN macronutrient_content USING (food_id)
+WHERE nutrient_id IN(1,4,6,7)
+AND date BETWEEN DATE_SUB(NOW(),INTERVAL 31 DAY) AND NOW()
+GROUP BY user_id,nutrient_id;
+\! echo " * macro_totals_monthly"
+# View: Macro totals weekly
+CREATE VIEW macro_totals_weekly AS
+SELECT user_id,nutrient_id,sum(servings*amount) AS macro_total_g
+FROM food_log
+INNER JOIN macronutrient_content USING (food_id)
+WHERE nutrient_id IN(1,4,6,7)
+AND date BETWEEN DATE_SUB(NOW(),INTERVAL 7 DAY) AND NOW()
+GROUP BY user_id,nutrient_id;
+\! echo " * macro_totals_weekly"
+# View: Macro totals today
+CREATE VIEW macro_totals_today AS
+SELECT user_id,nutrient_id,sum(servings*amount) AS macro_total_g
+FROM food_log
+INNER JOIN macronutrient_content USING (food_id)
+WHERE nutrient_id IN(1,4,6,7)
+AND DATE(date) = CURDATE()
+GROUP BY user_id,nutrient_id;
+\! echo " * macro_totals_today"
