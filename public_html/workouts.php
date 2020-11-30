@@ -16,35 +16,7 @@ $page_title = "Workouts";
 include '../templates/header.php';
 $db = new DB();
 ?>
-<script>
-var intensityrow = `
 
-                        <div class="form-row">
-                            <div class="form-group col-md-1 text-right">
-                            	<a href="#" class="removeintensity" onclick="$(this).closest('div.form-row').remove();"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red; font-weight: bold;">&#x24E7;</span></a>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <label for="mets_value[]" class="sr-only">Mets Value</label>
-                                <input type="number" min="1.0" max="14.0" step="0.1" id="mets_value[]" name="mets_value[]" class="form-control" placeholder="Mets Value" required>
-                            </div>
-                            <div class="form-group col-md-8">
-                                <label for="intensity[]" class="sr-only">Intensity</label>
-                                <input type="text" id="intensity[]" name="intensity[]" class="form-control" placeholder="Intensity Description" required>
-                            </div>
-                        </div>
-`;
-$(document).ready(function(){
-  $("#addintensity").click(function(){
-    $("#intensities").append(intensityrow);
-  });
-  $(".removeintensity").click(function() {
-    $(this).parent('div').parent('div').remove();
-  });
-  $(function () {
-    $('[data-toggle="tooltip"]').tooltip()
-  });
-});
-</script>
     <!-- Page Content -->
     <main role="main" class="container">
         <div class="row">
@@ -74,18 +46,90 @@ if(isset($_GET['action'])):
         <div class="row">
         </div>
 <?php   break;
-        case 'browse': ?>
-        <?php if(isset($_GET['id'])): ?>
-            <h1>Workout <?php echo $_GET['id'] ?></h1>
-        <?php else: ?>
-            <h1>Directory of workouts</h1>
-            <ul><?php foreach($db->get_workout_types() as $id => $name): ?>
-                <li><a href="?action=browse&id=<?php echo $id ?>"><?php echo htmlspecialchars($name) ?></li>
-            <?php endforeach; ?></ul>
-        <?php endif; ?>
+        case 'browse':
+            if(isset($_GET['id'])):
+                $workout_type = $db->query("SELECT * FROM workout_type WHERE id = ?", [$_GET['id']])->fetch(PDO::FETCH_ASSOC);
+?>
+        <h1>Physical Activities &rsaquo; <?php echo $workout_type['category']; ?> &rsaquo; <?php echo $workout_type['activity']; ?>  &rsaquo; <?php echo $workout_type['intensity']; ?></h1>
         <div class="row">
+            <div class="col-md-5">
+                <h3 class="text-center">Details</h2>
+                <table class="table table-striped">
+                    <tr>
+                        <th>Category</th><td><a href="?action=browse&category=<?php echo $workout_type['category']; ?>"><?php echo $workout_type['category']; ?></a></td>
+                    </tr>
+                    <tr>
+                        <th>Activity</th><td><a href="?action=browse&activity=<?php echo $workout_type['activity']; ?>"><?php echo $workout_type['activity']; ?></a></td>
+                    </tr>
+                    <tr>
+                        <th>Intensity</th><td><?php echo $workout_type['intensity']; ?></td>
+                    </tr>
+                    <tr>
+                        <th>MET Value</th><td><?php echo $workout_type['mets_value']; ?></td>
+                    </tr>
+                    <tr>
+                        <th>MET Code</th><td><?php echo $workout_type['mets_code']; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Description</th><td><?php echo $workout_type['description']; ?></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-7">
+                <h3 class="text-center">What do these values mean?</h3>
+                <dl class="row">
+                    <dt class="col-sm-2">Category</dt>
+                    <dd class="col-sm-10">Activities are grouped together in broader categories.</dd>
+                    <dt class="col-sm-2">Activity</dt>
+                    <dd class="col-sm-10">This is the short description of the activity, broken down a bit more specifically than the category.</dd>
+                    <dt class="col-sm-2">Intensity</dt>
+                    <dd class="col-sm-10">This is a variation on the activity that has its own MET value.</dd>
+                    <dt class="col-sm-2">MET Value</dt>
+                    <dd class="col-sm-10">This is the metabolic equivilant ratio used to estimate calories burned.<br>The equation is <code>calories&nbsp;burned</code> &equals; <code>METS&nbsp;code</code> &times; <code>duration&nbsp;in&nbsp;hours</code> &times; <code>weight&nbsp;in&nbsp;kg</code></dd>
+                    <dt class="col-sm-2">MET Code</dt>
+                    <dd class="col-sm-10">This is the code assigned to the activity on the <a href="https://sites.google.com/site/compendiumofphysicalactivities/" target="_blank">Compendium of Physical Activities</a> website (if known).</dd>
+                    <dt class="col-sm-2">Description</dt>
+                    <dd class="col-sm-10">This is the detailed description of the activity.</dd>
+                </dl>
+            </div>
         </div>
-<?php   break;
+<?php       elseif(isset($_GET['activity'])):
+                $activities = $db->query("SELECT * FROM workout_type WHERE activity = ?", [$_GET['activity']])->fetchAll(PDO::FETCH_ASSOC); ?>
+        <h1>Physical Activities &rsaquo; <?php echo ucwords(htmlspecialchars($activities[0]['category'])); ?> &rsaquo; <?php echo ucwords(htmlspecialchars($_GET['activity'])); ?></h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>MET Code</th><th>MET Value</th><th>Intensity</th>
+                </tr>
+            </thead>
+            <tbody>
+<?php           foreach($activities as $activity): ?>
+                <tr>
+                    <td><?php echo $activity['mets_code']; ?></td><td><?php echo $activity['mets_value']; ?></td><td><a href="?action=browse&id=<?php echo $activity['id']; ?>"><?php echo htmlspecialchars($activity['intensity']); ?></a></td>
+                </tr>
+<?php           endforeach; ?>
+            </tbody>
+        </table>
+<?php       elseif(isset($_GET['category'])): ?>
+        <h1>Physical Activities &rsaquo; <?php echo ucwords(htmlspecialchars($_GET['category'])); ?></h1>
+        <ul>
+<?php           foreach($db->query("SELECT DISTINCT activity FROM workout_type WHERE category = ?", [$_GET['category']])->fetchAll(PDO::FETCH_COLUMN) as $activity): ?>
+            <li>
+                <a href="?action=browse&activity=<?php echo $activity; ?>"><?php echo ucwords($activity); ?></a>
+            </li>
+<?php           endforeach; ?>
+        </ul>
+<?php       else: ?>
+        <h1>Physical Activity Categories</h1>
+        <ul>
+<?php           foreach($db->query("SELECT DISTINCT category FROM workout_type")->fetchAll(PDO::FETCH_COLUMN) as $category): ?>
+            <li>
+                <a href="?action=browse&category=<?php echo $category; ?>"><?php echo ucwords($category); ?></a>
+            </li>
+<?php           endforeach; ?>
+        </ul>
+<?php       endif;
+        break;
         case 'new': ?>
         <h1>Create a new type of workout</h1>
 <?php
@@ -195,7 +239,7 @@ if (count($new_workouts) > 0) {
                     </div>
                     <div class="form-row">
                         <div class="form-group col-md-1 mets text-right">
-                        	<label for="addintensity"><span style="font-size: 1em; color: transparent; text-shadow: 0 0 0 green; text-align: right">&#x2795;</span></label>
+                            <label for="addintensity"><span style="font-size: 1em; color: transparent; text-shadow: 0 0 0 green; text-align: right">&#x2795;</span></label>
                         </div>
                         <div class="form-group col-md-3 mets">
                             <button type="button" id="addintensity" class="btn btn-secondary">Add intensity</button>
@@ -211,7 +255,37 @@ if (count($new_workouts) > 0) {
                     </div>
                 </form>
             </div>
-        </div><?php
+        </div>
+        <script>
+var intensityrow = `
+
+                        <div class="form-row">
+                            <div class="form-group col-md-1 text-right">
+                                <a href="#" class="removeintensity" onclick="$(this).closest('div.form-row').remove();"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red; font-weight: bold;">&#x24E7;</span></a>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="mets_value[]" class="sr-only">Mets Value</label>
+                                <input type="number" min="1.0" max="14.0" step="0.1" id="mets_value[]" name="mets_value[]" class="form-control" placeholder="Mets Value" required>
+                            </div>
+                            <div class="form-group col-md-8">
+                                <label for="intensity[]" class="sr-only">Intensity</label>
+                                <input type="text" id="intensity[]" name="intensity[]" class="form-control" placeholder="Intensity Description" required>
+                            </div>
+                        </div>
+`;
+$(document).ready(function(){
+  $("#addintensity").click(function(){
+    $("#intensities").append(intensityrow);
+  });
+  $(".removeintensity").click(function() {
+    $(this).parent('div').parent('div').remove();
+  });
+  $(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+  });
+});
+        </script>
+        <?php
         break;
     endswitch; ?>
 <?php else: ?>
