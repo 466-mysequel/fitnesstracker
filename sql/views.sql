@@ -90,3 +90,4 @@ CREATE VIEW total_food_logs AS
 SELECT user_id,food_id,nutrient_id,servings,date FROM food_log
 INNER JOIN macronutrient_content USING (food_id)
 GROUP BY user_id,food_id ORDER BY date ASC;
+\! echo " * total_food_logs"
