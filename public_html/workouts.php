@@ -9,6 +9,8 @@ error_reporting(E_ALL);
 include_once '../src/db.php';
 include_once '../src/library.php';
 
+require_signed_in();
+
 // Start writing the page
 $page_title = "Workouts";
 include '../templates/header.php';
@@ -163,8 +165,8 @@ if(isset($_GET['action'])):
                                 <option value="transportation">Transportation</option>
                                 <option value="walking">Walking</option>
                                 <option value="water activities">Water Activites</option>
-                                <option value="winter activities">Winter Activities</option>  
-                                <option value="volunteer activities">Volunteer Work</option> 
+                                <option value="winter activities">Winter Activities</option>
+                                <option value="volunteer activities">Volunteer Work</option>
                             </select>
                         </div>
                         <div class="form-group col-md-8 text-right">
