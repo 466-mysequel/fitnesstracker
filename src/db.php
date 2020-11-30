@@ -142,9 +142,19 @@ class DB {
         // Prepare statement
         $sql = "INSERT INTO nutrient (name, rdv_amount, rdv_unit) VALUES (?, ?, ?)";
         // Execute statement;
-        $pdo = $this -> query($sql, [$name, $rdv_amount, $rdv_unit]);
-
-        return $this->pdo->lastInsertId();
+        if(!is_null($name) && !empty($name) && isset($rdv_amount) && (!is_null($rdv_amount) || floatval($rdv_amount) != 0) && !is_null($rdv_unit) && !empty($rdv_unit)){
+            $pdo = $this -> query($sql, [$name, $rdv_amount, $rdv_unit]);
+            return $this->pdo->lastInsertId();
+        }
+        else if(is_null($name) || empty($name)){
+            return -1; // no name
+        }
+        else if(is_null($rdv_unit) || empty($rdv_unit)) {
+            return -3; // no rdv unit 
+        }
+        else{
+            return -4; //some or all values are null or empty
+        }
     }
 
     /**

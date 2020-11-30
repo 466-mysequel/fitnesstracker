@@ -71,11 +71,11 @@ if(isset($_GET['action'])):
             <label for="serving_size_friendly" >Serving Size</label>
             <input type="text" id="serving_size_friendly" name="serving_size_friendly" class="form-control" placeholder="i.e., 1 egg">
             <label for="calories" >Calories Per Serving</label>
-            <input type="number" id="calories" name="calories_per_serving" class="form-control" placeholder="100">
+            <input type="number" min="0" id="calories" name="calories_per_serving" class="form-control" placeholder="100">
             <label for="serving_size_grams" >Serving Size (g)</label>
-            <input type="number" id="serving_size_grams" name="serving_size_grams" class="form-control" placeholder="50">
+            <input type="number" min="0" id="serving_size_grams" name="serving_size_grams" class="form-control" placeholder="50">
             <label for="serving_size_cc" >Serving Size (cc)</label>
-            <input type="number" id="serving_size_cc" name="serving_size_cc" class="form-control" placeholder="optional">
+            <input type="number" min="0" id="serving_size_cc" name="serving_size_cc" class="form-control" placeholder="optional">
         </div>
         <div class="col">    
             <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -92,9 +92,67 @@ if(isset($_GET['action'])):
                 </button>
             </div>
             <button class="btn btn-lg btn-primary" type="submit">Add Food</button>
+            <p>Don't see a nutrient? <a href="meals.php?action=nutrient">add</a> one!
         </div>        
     </div>
 </form>
+
+<?php   break;
+        case 'nutrient': ?>
+        <?php 
+            $result=NULL;
+            if(isset($_POST['name']) && isset($_POST['rdv_amount']) && isset($_POST['rdv_unit'])){
+                  $result = $db->add_nutrient($_POST['name'], (float)$_POST['rdv_amount'],$_POST['rdv_unit']);
+              }
+        ?>
+        <div class="row">
+            <div class="col">
+            </div>
+            <div class="col" style="text-align:center;">
+                <form method="POST">
+                    <label for="nutrient_name">Name</label>
+                    <input type="text" id="nutrient_name" name="name" class="form-control">
+                    <label for="rdv_amount">Recommended Daily Value</label>
+                    <input type="number" min="0" id="rdv_amount" name="rdv_amount" class="form-control" placeholder="0">
+                    <label for="rdv_unit">Unit</label>
+                    <select id="rdv_unit" name="rdv_unit" class="form-control">
+                        <option value="g">g</option>
+                        <option value="mg">mg</option>
+                        <option value="mcg">mcg</option>
+                    </select>
+                    <br>
+                    <button class="btn btn-lg btn-primary" type="submit">Add Nutrient</button>
+                </form>
+                <?php if(isset($result) && ($result > 0 && $result != NULL)) {
+                        echo '<div class="alert alert-success" role="alert">';
+                        echo '    Nutrient added! ';
+                        echo $result;
+                        echo '</div>';
+                    }
+                    else if(isset($result) && $result != NULL && $result == -1){ 
+                        echo '<div class="alert alert-danger" role="alert">';
+                        echo '    Name was not entered or was left blank! ';
+                        echo $result;
+                        echo '</div>';
+                    }
+                    else if(isset($result) && $result != NULL && $result == -3){ 
+                        echo '<div class="alert alert-danger" role="alert">';
+                        echo '    RDV unit was not entered or was left blank! ';
+                        echo $result;
+                        echo '</div>';
+                    }
+                    else if(isset($result) && $result != NULL && $result == -4){ 
+                        echo '<div class="alert alert-danger" role="alert">';
+                        echo '    Some or all items were not entered or left blank! ';
+                        echo $result;
+                        echo '</div>';
+                    }
+                    else{}
+                ?>
+            </div>
+            <div class="col">
+            </div>
+        </div>
 <?php   break;
         endswitch; ?>
 <?php else: ?>
@@ -117,7 +175,6 @@ if(isset($_GET['action'])):
         <?php 
             $nutrients = $db->get_macronutrients();
         ?>
-        var max_macros = 4;
         var wrapper = $(".macros");
         var add_macros = $(".add-macros");
         let option_ids = new Array();
@@ -135,7 +192,7 @@ if(isset($_GET['action'])):
                 for(var i = 0; i < option_ids.length; i++){
                     html = html.concat(`<option value=${option_ids[i]}>${option_names[i]}</option>`);
                 }   
-                html = html.concat(`</select><input type="number" name="macro_g[]" style="width:3em"/>grams <a href="#" class="delete-macro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
+                html = html.concat(`</select><input type="number" min="0" name="macro_g[]" style="width:3em"/>grams <a href="#" class="delete-macro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
                 $(wrapper).append(html); //add input box
             } else {
                 alert('No more macronutrients available')
@@ -153,7 +210,6 @@ if(isset($_GET['action'])):
         <?php 
             $nutrients = $db->get_micronutrients();
         ?>
-        var max_micros = 40;
         var wrapper = $(".micros");
         var add_micros = $(".add-micros");
         let option_ids = new Array();
@@ -171,7 +227,7 @@ if(isset($_GET['action'])):
                 for(var i = 0; i < option_ids.length; i++){
                     html = html.concat(`<option value=${option_ids[i]}>${option_names[i]}</option>`);
                 }   
-                html = html.concat(`</select><input type="number" name="micro_dv[]" style="width:3em"/>% <a href="#" class="delete-micro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
+                html = html.concat(`</select><input type="number" min="0" name="micro_dv[]" style="width:3em"/>% <a href="#" class="delete-micro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
                 $(wrapper).append(html); //add input box
             } else {
                 alert('No more micronutrients available')
