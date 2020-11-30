@@ -25,11 +25,11 @@ var intensityrow = `
                             </div>
                             <div class="form-group col-md-3">
                                 <label for="mets_value[]" class="sr-only">Mets Value</label>
-                                <input type="number" min="1.0" max="14.0" step="0.1" id="mets_value[]" name="mets_value[]" class="form-control" placeholder="Mets Value">
+                                <input type="number" min="1.0" max="14.0" step="0.1" id="mets_value[]" name="mets_value[]" class="form-control" placeholder="Mets Value" required>
                             </div>
                             <div class="form-group col-md-8">
                                 <label for="intensity[]" class="sr-only">Intensity</label>
-                                <input type="text" id="intensity[]" name="intensity[]" class="form-control" placeholder="Intensity Description">
+                                <input type="text" id="intensity[]" name="intensity[]" class="form-control" placeholder="Intensity Description" required>
                             </div>
                         </div>
 `;
@@ -144,7 +144,7 @@ if(isset($_GET['action'])):
                     </div>
                     <div class="form-row">
                         <div class="form-group col-md-4 text-right">
-                            <select class="form-control" name="category" id="category">
+                            <select class="form-control" name="category" id="category" required>
                                 <option value="" disabled selected hidden>Category</option>
                                 <option value="bicycling">Bicycling</option>
                                 <option value="conditioning excerise">Conditioning Excerise</option>
@@ -171,7 +171,7 @@ if(isset($_GET['action'])):
                         </div>
                         <div class="form-group col-md-8 text-right">
                             <label for="activity" class="sr-only">Activity Name</label>
-                            <input type="text" id="activity" name="activity" class="form-control" placeholder="Activity Name">
+                            <input type="text" id="activity" name="activity" class="form-control" placeholder="Activity Name" required>
                         </div>
                     </div>
                     <div class="form-row">
@@ -195,11 +195,11 @@ if(isset($_GET['action'])):
                             </div>
                             <div class="form-group col-md-3">
                                 <label for="mets_value[]" class="sr-only">Mets Value</label>
-                                <input type="number" min="1.0" max="14.0" step="0.1" id="mets_value[]" name="mets_value[]" class="form-control" placeholder="1">
+                                <input type="number" min="1.0" max="14.0" step="0.1" id="mets_value[]" name="mets_value[]" class="form-control" placeholder="1" required>
                             </div>
                             <div class="form-group col-md-8">
                                 <label for="intensity[]" class="sr-only">Intensity</label>
-                                <input type="text" id="intensity[]" name="intensity[]" class="form-control" placeholder="eg. low, medium, high, casual, or competitive">
+                                <input type="text" id="intensity[]" name="intensity[]" class="form-control" placeholder="eg. low, medium, high, casual, or competitive" required>
                             </div>
                         </div>
                     </div>

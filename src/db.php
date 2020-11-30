@@ -350,7 +350,11 @@ class DB {
         string $intensity,
         ?string $description = null
     ): int {
-        if(is_null($description)) {
+        // Don't allow empty strings for these
+        if(empty($mets_value) || empty($category) || empty($activity) || empty($intensity))
+            return -1;
+        // Allow empty description
+        if(empty($description)) {
             $description = "$activity, $intensity";
         }
         // Prepare insert statement
