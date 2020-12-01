@@ -538,7 +538,28 @@ class DB {
         }
         return $macro_calories;
     }
-}
 
+
+    /**
+     * To get latest workout from the workout_log tables
+     * 
+     * @author @HR0102
+     * @param user_id -The user's id
+     * @return array
+     * @see "Project Issue #31
+     */
+    function get_latest_workout(int $user_id){
+        $sql = "SELECT t.category,t.activity,u.username,l.date 
+        FROM workout_log l 
+        JOIN user u ON u.id = l.user_id 
+        JOIN workout_type t ON t.id = l.workout_type_id 
+        WHERE u.id = ? 
+        ORDER BY l.date DESC LIMIT 1";
+
+        $rows=$this->query($sql,[$user_id])->fetchAll(PDO::FETCH_ASSOC);
+        return $rows;
+
+    }
+}
 
 ?>

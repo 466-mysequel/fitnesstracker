@@ -10,6 +10,7 @@ include_once '../src/db.php';
 include_once '../src/library.php';
 
 // Start writing the page
+session_start();
 $page_title = "Fitness Tracker &rsaquo; Home Page";
 include '../templates/header.php';
 $db = new DB();
@@ -37,7 +38,12 @@ HTML;
             <h1><?php echo $page_title; ?></h1>
         </div>
         <main role="main" class="container">
-            <h1> Signed in</h1>
+            <?php $rows=$db->get_latest_workout((int) $_SESSION['user_id']);
+                echo "Your Latest Workout: <br>";
+                foreach($rows as $row){
+                    echo $row['date']. "<br>" . $row['category']. "<br>" . $row['activity'];
+                }
+            ?>
         </main>
     <?php else: ?>
         <div class="signed-out">
