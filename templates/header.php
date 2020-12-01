@@ -14,6 +14,13 @@ include_once '../src/library.php';
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <!-- Bootstrap: -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<?php
+if(isset($stylesheets)) {
+    foreach ($stylesheets as $stylesheet) {
+        echo "    <link rel=\"stylesheet\" href=\"$stylesheet\">";
+    }
+}
+?>
     <style>
 html {
     position: relative;

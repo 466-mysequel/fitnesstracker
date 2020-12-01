@@ -9,6 +9,18 @@ include_once '../src/library.php';
 require_signed_in(); 
 $page_title = "Fitness Tracker &rsaquo; Foods";
 $result=NULL;
+$stylesheets = ['css/nutrition-facts.css'];
+$style = <<<CSS
+.food {
+    float: left; margin: 5px;
+}
+.solid {
+    width:108px; height:108px; background:url(img/fooddrink.png) 0px 0px;
+}
+.liquid {
+    width:108px; height:108px; background:url(img/fooddrink.png) -108px 0px;
+}
+CSS;
 include_once '../templates/header.php';
 ?>
     <!-- Page Content -->
@@ -65,11 +77,244 @@ if(isset($_GET['action'])):
         <div class="row">
         </div>
 <?php   break;
-        case 'browse': ?>
-        <?php if(isset($_GET['id'])): ?>
-            <h2>Meal <?php echo $_GET['id'] ?></h2>
+        case 'browse':
+            if(isset($_GET['id'])):
+                $food = $db->get_food((int) $_GET['id']);
+                $macros = $db->get_food_macronutrients((int) $_GET['id']);
+                $micros = $db->get_food_micronutrients((int) $_GET['id']);
+?>
+        <h1>Foods &rsaquo; <?php echo $food['name']; ?> &rsaquo; Details</h1>
+        <div><h3><div class="<?php echo $food['type']; ?> food"></div></h2></div>
+        <div>
+            <!-- HTML/CSS originally based on snippet from https://codemyui.com/nutrition-facts-table-using-html-css/ and modified to suit our needs -->
+            <section class="nutrition-facts">
+            <header class="nutrition-facts-header">
+                <h1 class="nutrition-facts-title">Nutrition Facts</h1>
+                <p>Serving Size <?php echo $food['serving_size_friendly']; ?> (about <?php echo $food['serving_size_grams']; ?>g)</p>
+            </header>
+            <table class="nutrition-facts-table">
+                <thead>
+                    <tr>
+                        <th colspan="3" class="small-info">Amount Per Serving</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th colspan="2">
+                            <b>Calories</b> 
+                            <?php echo $food['calories_per_serving']; ?>
+                        </th>
+                        <td>
+                            Calories from Fat
+                            <?php echo (isset($macros['Fat']) ? (int)$macros['Fat']['amount'] * 4 : 0 ); ?>
+                        </td>
+                    </tr>
+                    <tr class="thick-row">
+                        <td colspan="3" class="small-info">
+                        <b>% Daily Value*</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">
+                            <b>Total Fat</b>
+                            <?php echo (isset($macros['Fat']) ? $macros['Fat']['amount'] : 0 ); ?>g
+                        </th>
+                        <td>
+                            <b><?php echo (isset($macros['Fat']) ? $macros['Fat']['percent_dv'] : 0 ); ?>%</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="blank-cell">
+                        </td>
+                        <th>
+                            Saturated Fat
+                            <?php echo (isset($macros['Saturated fat']) ? $macros['Saturated fat']['amount'] : 0 ); ?>g
+                        </th>
+                        <td>
+                            <b><?php echo (isset($macros['Saturated fat']) ? $macros['Saturated fat']['percent_dv'] : 0 ); ?>%</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="blank-cell">
+                        </td>
+                        <th>
+                            Trans Fat
+                            <?php echo (isset($macros['Trans fat']) ? $macros['Trans fat']['amount'] : 0 ); ?>g
+                        </th>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">
+                            <b>Cholesterol</b>
+                            <?php echo (isset($macros['Cholesterol']) ? $macros['Cholesterol']['amount'] : 0 ); ?>mg
+                        </th>
+                        <td>
+                            <b><?php echo (isset($macros['Cholesterol']) ? $macros['Cholesterol']['percent_dv'] : 0 ); ?>%</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">
+                            <b>Sodium</b>
+                            <?php echo (isset($macros['Sodium']) ? $macros['Sodium']['amount'] : 0 ); ?>mg
+                        </th>
+                        <td>
+                            <b><?php echo (isset($macros['Sodium']) ? $macros['Sodium']['percent_dv'] : 0 ); ?>%</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">
+                            <b>Total Carbohydrate</b>
+                            <?php echo (isset($macros['Total carbohydrates']) ? $macros['Total carbohydrates']['amount'] : 0 ); ?>g
+                        </th>
+                        <td>
+                            <b><?php echo (isset($macros['Total carbohydrates']) ? $macros['Total carbohydrates']['percent_dv'] : 0 ); ?>%</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="blank-cell">
+                        </td>
+                        <th>
+                            Dietary Fiber
+                            <?php echo (isset($macros['Dietary fiber']) ? $macros['Dietary fiber']['amount'] : 0 ); ?>g
+                        </th>
+                        <td>
+                            <b><?php echo (isset($macros['Dietary fiber']) ? $macros['Dietary fiber']['percent_dv'] : 0 ); ?>%</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="blank-cell">
+                        </td>
+                        <th>
+                            Added sugars
+                            <?php echo (isset($macros['Added sugars']) ? $macros['Added sugars']['amount'] : 0 ); ?>g
+                        </th>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr class="thick-end">
+                        <th colspan="2">
+                            <b>Protein</b>
+                            <?php echo (isset($macros['Protein']) ? $macros['Protein']['amount'] : 0 ); ?>g
+                        </th>
+                        <td>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="nutrition-facts-table--grid">
+                <tbody>
+                <tr>
+                    <td colspan="2">
+                    Vitamin A
+                    <?php echo (isset($micros['Vitamin A']) ? $micros['Vitamin A']['percent_dv'] : 0 ); ?>%
+                    </td>
+                    <td>
+                    Vitamin C
+                    <?php echo (isset($micros['Vitamin C']) ? $micros['Vitamin C']['percent_dv'] : 0 ); ?>%
+                    </td>
+                </tr>
+                <tr class="thin-end">
+                    <td colspan="2">
+                    Calcium
+                    <?php echo (isset($micros['Calcium']) ? $micros['Calcium']['percent_dv'] : 0 ); ?>%
+                    </td>
+                    <td>
+                    Iron
+                    <?php echo (isset($micros['Iron']) ? $micros['Iron']['percent_dv'] : 0 ); ?>%
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <p class="small-info">* Percent Daily Values are based on a 2,000 calorie diet. Your daily values may be higher or lower depending on your calorie needs:</p>
+
+            <table class="nutrition-facts-table--small small-info">
+                <thead>
+                <tr>
+                    <td colspan="2"></td>
+                    <th>Calories:</th>
+                    <th>2,000</th>
+                    <th>2,500</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th colspan="2">Total Fat</th>
+                    <td>Less than</td>
+                    <td>65g</td>
+                    <td>80g</td>
+                </tr>
+                <tr>
+                    <td class="blank-cell"></td>
+                    <th>Saturated Fat</th>
+                    <td>Less than</td>
+                    <td>20g</td>
+                    <td>25g</td>
+                </tr>
+                <tr>
+                    <th colspan="2">Cholesterol</th>
+                    <td>Less than</td>
+                    <td>300mg</td>
+                    <td>300 mg</td>
+                </tr>
+                <tr>
+                    <th colspan="2">Sodium</th>
+                    <td>Less than</td>
+                    <td>2,400mg</td>
+                    <td>2,400mg</td>
+                </tr>
+                <tr>
+                    <th colspan="3">Total Carbohydrate</th>
+                    <td>300g</td>
+                    <td>375g</td>
+                </tr>
+                <tr>
+                    <td class="blank-cell"></td>
+                    <th colspan="2">Dietary Fiber</th>
+                    <td>25g</td>
+                    <td>30g</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <p class="small-info">
+                Calories per gram:
+            </p>
+            <p class="small-info text-center">
+                Fat 9
+                &bull;
+                Carbohydrate 4
+                &bull;
+                Protein 4
+            </p>
+
+            </section>
+        </div>
         <?php else: ?>
-            <h2>Directory of foods</h2>
+            <h1>Directory of foods</h2>
+            <div class="row">
+                <div class="col-4">
+                    <h3>Foods</h3>
+                    <ul>
+            <?php $foods = $db->query("SELECT id,name FROM food WHERE type = 'solid'")->fetchAll(PDO::FETCH_ASSOC); foreach ($foods as $food): ?>
+                <li>
+                    <a href="?action=browse&id=<?php echo $food['id']; ?>"><?php echo $food['name']; ?></a>
+                </li>
+            <?php endforeach; ?>
+                    </ul>
+                </div>
+                <div class="col-4">
+                    <h3>Beverages</h3>
+                    <ul>
+            <?php $foods = $db->query("SELECT id,name FROM food WHERE type = 'liquid'")->fetchAll(PDO::FETCH_ASSOC); foreach ($foods as $food): ?>
+                <li>
+                    <a href="?action=browse&id=<?php echo $food['id']; ?>"><?php echo $food['name']; ?></a>
+                </li>
+            <?php endforeach; ?>
+                    </ul>
+                </div>
+            </div>
         <?php endif; ?>
         <div class="row">
         </div>

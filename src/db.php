@@ -389,6 +389,19 @@ class DB {
         return (double)"0.0";
     }
     
+    
+    /**
+     * Get food
+     * 
+     * Get info about an food by ID
+     * @param id The ID for the food to get
+     * @return string[]
+     * @example get_food(1);
+     */
+    function get_food(int $id) {
+        return $this->query("SELECT * FROM food WHERE id = ?", [$id])->fetch(PDO::FETCH_ASSOC);
+    }
+    
     /**
      * Get foods
      * 
@@ -576,7 +589,7 @@ class DB {
         return $macro_calories;
     }
 
-    /*
+    /**
      * Fetch all macronutrients from the database
      * 
      * @return array an array of macronutrient IDs and Names
@@ -602,6 +615,62 @@ class DB {
         $stmt = $this->query($sql);
         $array_results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $array_results;
+    }
+    
+    /**
+     * Fetch macronutrients relevant to a specific food from the database
+     * 
+     * @param int food_id The ID of the food
+     * @return array an array of macronutrient IDs and Names
+     * @example $macros = get_food_macronutrients(1);
+     */
+    function get_food_macronutrients(int $food_id) :array {
+        $sql = <<<SQL
+        SELECT nutrient.name, amount, rdv_unit, ROUND(amount/rdv_amount*100) AS percent_dv
+        FROM macronutrient_content
+        INNER JOIN food ON food.id = food_id
+        INNER JOIN nutrient ON nutrient.id = nutrient_id
+        WHERE food.id = ?;
+        SQL;
+        $stmt = $this->query($sql, [$food_id]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $macros = [];
+        foreach($rows as $row) {
+            $macros[$row['name']] = [
+                'amount' => $row['amount'],
+                'unit' => $row['rdv_unit'],
+                'percent_dv' => $row['percent_dv']
+            ];
+        }
+        return $macros;
+    }
+
+    /**
+     * Fetch all micronutrients relevant to a specific food from the database
+     * 
+     * @param int food_id The ID of the food
+     * @return array an array of micronutrient IDs and Names
+     * @example $macros = get_food_micronutrients(1);
+     */
+    function get_food_micronutrients(int $food_id) :array {
+        $sql = <<<SQL
+        SELECT nutrient.name, (rdv_amount*percent_dv/100) AS amount, rdv_unit, percent_dv
+        FROM micronutrient_content
+        INNER JOIN food ON food.id = food_id
+        INNER JOIN nutrient ON nutrient.id = nutrient_id
+        WHERE food.id = ?;
+        SQL;
+        $stmt = $this->query($sql, [$food_id]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $micros = [];
+        foreach($rows as $row) {
+            $micros[$row['name']] = [
+                'amount' => $row['amount'],
+                'unit' => $row['rdv_unit'],
+                'percent_dv' => $row['percent_dv']
+            ];
+        }
+        return $micros;
     }
 }
 ?>
