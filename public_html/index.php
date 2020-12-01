@@ -27,8 +27,14 @@ echo<<<HTML
   position: relative;
   background-attachment: fixed;
 }
+
+p {
+  color: red;
+  text-transform: uppercase;
+}
 </style>
 HTML;
+
 
 ?>
     <!-- Page Content -->
@@ -39,9 +45,9 @@ HTML;
         </div>
         <main role="main" class="container">
             <?php $rows=$db->get_latest_workout((int) $_SESSION['user_id']);
-                echo "Your Latest Workout: <br>";
+                echo "<h1><b>Your Latest Workout:</b></h1> <br>";
                 foreach($rows as $row){
-                    echo $row['date']. "<br>" . $row['category']. "<br>" . $row['activity'];
+                    echo "<p>". $row['date']. "<br>" . $row['category']. "<br>" . $row['activity'] . "</p>";
                 }
             ?>
         </main>
