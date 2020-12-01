@@ -6,25 +6,24 @@ error_reporting(E_ALL);
 include_once '../src/db.php';
 $db = new DB();
 include_once '../src/library.php'; 
-$page_title = "Fitness Tracker &rsaquo; Meals Page";
+$page_title = "Fitness Tracker &rsaquo; Foods";
 $result=NULL;
 include_once '../templates/header.php';
-$user = $db->get_user($_SESSION['user_id']);
 ?>
     <!-- Page Content -->
     <main role="main" class="container">
         <div class="row">
             <div class="col-3">
-                <a class="btn btn-secondary btn-lg btn-block" href="meals.php?action=log" role="button" title="Record a meal">Log a meal</a>
+                <a class="btn btn-secondary btn-lg btn-block" href="foods.php?action=log" role="button" title="Record a meal">Log a meal</a>
             </div>
             <div class="col-3">
-                <a class="btn btn-secondary btn-lg btn-block" href="meals.php?action=history" role="button" title="See your meal history">Meal history</a>
+                <a class="btn btn-secondary btn-lg btn-block" href="foods.php?action=history" role="button" title="See your meal history">Meal history</a>
             </div>
             <div class="col-3">
-                <a class="btn btn-secondary btn-lg btn-block" href="meals.php?action=browse" role="button" title="Browse a database full of food">Browse foods</a>
+                <a class="btn btn-secondary btn-lg btn-block" href="foods.php?action=browse" role="button" title="Browse a database full of food">Browse foods</a>
             </div>
             <div class="col-3">
-                <a class="btn btn-secondary btn-lg btn-block" href="meals.php?action=new" role="button" title="Create a new food">Create food</a>
+                <a class="btn btn-secondary btn-lg btn-block" href="foods.php?action=new" role="button" title="Create a new food">Create food</a>
             </div>
         </div>
 <?php
@@ -115,7 +114,7 @@ if(isset($_GET['action'])):
                 </button>
             </div>
             <button class="btn btn-lg btn-primary" type="submit">Add Food</button>
-            <p>Don't see your nutrient? <a href="meals.php?action=nutrient">add</a> it!
+            <p>Don't see your nutrient? <a href="foods.php?action=nutrient">add</a> it!
         </div>        
     </div>
 </form>
