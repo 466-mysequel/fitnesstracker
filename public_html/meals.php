@@ -7,8 +7,9 @@ include_once '../src/db.php';
 $db = new DB();
 include_once '../src/library.php'; 
 $page_title = "Fitness Tracker &rsaquo; Meals Page";
-
+$result=NULL;
 include_once '../templates/header.php';
+$user = $db->get_user($_SESSION['user_id']);
 ?>
     <!-- Page Content -->
     <main role="main" class="container">
@@ -26,13 +27,36 @@ include_once '../templates/header.php';
                 <a class="btn btn-secondary btn-lg btn-block" href="meals.php?action=new" role="button" title="Create a new food">Create food</a>
             </div>
         </div>
-    <?php
+<?php
 if(isset($_GET['action'])):
     switch($_GET['action']):
         case 'log': ?>
-        <h2>Log a meal</h2>
-        <div class="row">
-        </div>
+
+<?php if(isset($_SESSION['user_id']) && isset($_POST['food_id']) && isset($_POST['servings'])) {
+    $result = $db->log_food($_SESSION['user_id'],$_POST['food_id'],$_POST['servings']);
+} ?>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <form method="POST">
+            <h3>Keep track of your meals</h3>
+            <div class="form-row">
+                <div class="form-group col-md-10">
+                    <label for="mealtime" class="col-form-label"><h4>Date and time</h4></label>
+                    <input class="form-control" type="datetime-local" value="" id="mealtime" name="date">
+                </div>
+                <div class="form-group col-md-10">
+                    <div class="foods">
+                        <label for="food-item" class="col-form-label"><h4>Food Item</h4></label><br>
+                        <button class="btn btn-lg btn-primary" id="add-foods">Add Item</button>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-10">
+                    <button class="btn btn-lg btn-primary" type="submit">Log Meal</button>
+                </div>
+            </div>
+        </form>
 <?php   break;
         case 'history': ?>
         <h2>Your meal history</h2>
@@ -78,7 +102,6 @@ if(isset($_GET['action'])):
             <input type="number" min="0" id="serving_size_cc" name="serving_size_cc" class="form-control" placeholder="optional">
         </div>
         <div class="col">    
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
             <div class="macros">
                 <h3>Macronutrients</h3>
                 <button class="add-macros">Add Macro &nbsp; 
@@ -92,7 +115,7 @@ if(isset($_GET['action'])):
                 </button>
             </div>
             <button class="btn btn-lg btn-primary" type="submit">Add Food</button>
-            <p>Don't see a nutrient? <a href="meals.php?action=nutrient">add</a> one!
+            <p>Don't see your nutrient? <a href="meals.php?action=nutrient">add</a> it!
         </div>        
     </div>
 </form>
@@ -170,75 +193,127 @@ if(isset($_GET['action'])):
 
 <?php endif; ?>
     </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script type='text/javascript'>
     $(document).ready(function() {
         <?php 
-            $nutrients = $db->get_macronutrients();
+            $macronutrients = $db->get_macronutrients();
+            $micronutrients = $db->get_micronutrients();
+            $sql = "SELECT id,name FROM food";
+            $foods = $db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+            // $foods = $db->get_foods();
         ?>
-        var wrapper = $(".macros");
+        // wrapper divs
+        var macro_wrapper = $(".macros");
+        var micro_wrapper = $(".micros");
+        var food_wrapper = $(".foods");
+
+        // content divs
         var add_macros = $(".add-macros");
-        let option_ids = new Array();
-        let option_names = new Array();
-        <?php foreach($nutrients as $key => $value) { ?>;
-            option_ids.push('<?php echo $value['id']; ?>');
-            option_names.push('<?php echo $value['name']; ?>');
+        var add_micros = $(".add-micros");
+        var add_foods = $("#add-foods");
+
+        // used to store PHP arrays
+        var macro_option_ids = new Array();
+        var macro_option_names = new Array();
+        <?php foreach($macronutrients as $key => $value) { ?>;
+            macro_option_ids.push(`<?php echo $value['id']; ?>`);
+            macro_option_names.push(`<?php echo $value['name']; ?>`);
         <?php } ?>;
-        let x = 0;
+        var micro_option_ids = new Array();
+        var micro_option_names = new Array();
+        // create array of options
+        <?php foreach($micronutrients as $key => $value) { ?>;
+            micro_option_ids.push(`<?php echo $value['id']; ?>`);
+            micro_option_names.push(`<?php echo $value['name']; ?>`);
+        <?php } ?>;
+        var food_option_ids = new Array();
+        var food_option_names = new Array();
+        // create array of options
+        <?php foreach($foods as $key => $value) { ?>;
+            food_option_ids.push(`<?php echo $value['id']; ?>`);
+            food_option_names.push(`<?php echo $value['name']; ?>`);
+        <?php } ?>;
+
+        // counters
+        var num_macros = 0;
+        var num_micros = 0;
+        var num_foods = 0;
+
+        // function to add form fields for macronutrients
         $(add_macros).click(function(e) {
             e.preventDefault();
-            if (x < option_ids.length) {
-                x++;
-                var html = `<div><select name="macro_id[]">`;
-                for(var i = 0; i < option_ids.length; i++){
-                    html = html.concat(`<option value=${option_ids[i]}>${option_names[i]}</option>`);
-                }   
-                html = html.concat(`</select><input type="number" min="0" name="macro_g[]" style="width:3em"/>grams <a href="#" class="delete-macro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
-                $(wrapper).append(html); //add input box
+            // while number of macros is less than the total amount macros available, we can execute this block
+            if (num_macros < macro_option_ids.length) {
+
+                // used to create/append select options dynamically
+                var macro_html = `<div><select name="macro_id[]">`;
+                
+                for(var i = 0; i < macro_option_ids.length; i++){
+                    macro_html = macro_html.concat(`<option value=${macro_option_ids[i]}>${macro_option_names[i]}</option>`);
+                }
+
+                // add the rest to macro_html to close it up
+                macro_html = macro_html.concat(`</select><input type="number" min="0" name="macro_g[]" style="width:3em"/>grams <a href="#" class="delete-macro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
+                $(macro_wrapper).append(macro_html); //add input box
+                num_macros++; // add to macro counter
             } else {
                 alert('No more macronutrients available')
             }
         });
-
-        $(wrapper).on("click", ".delete-macro", function(e) {
+        // function to remove form fields for macronutrients
+        $(macro_wrapper).on("click", ".delete-macro", function(e) {
             e.preventDefault();
             $(this).parent('div').remove();
             x--;
         })
-    });
 
-    $(document).ready(function() {
-        <?php 
-            $nutrients = $db->get_micronutrients();
-        ?>
-        var wrapper = $(".micros");
-        var add_micros = $(".add-micros");
-        let option_ids = new Array();
-        let option_names = new Array();
-        <?php foreach($nutrients as $key => $value) { ?>;
-            option_ids.push('<?php echo $value['id']; ?>');
-            option_names.push('<?php echo $value['name']; ?>');
-        <?php } ?>;
-        let x = 0;
+        // function to add form fields for micronutrients
         $(add_micros).click(function(e) {
             e.preventDefault();
-            if (x < option_ids.length) {
-                x++;
-                var html = `<div><select name="micro_id[]">`;
-                for(var i = 0; i < option_ids.length; i++){
-                    html = html.concat(`<option value=${option_ids[i]}>${option_names[i]}</option>`);
+            // allow append to execute as long as x is less than the number of macronutrients
+            if (num_micros < micro_option_ids.length) {
+                
+                var micro_html = `<div><select name="micro_id[]">`;
+                for(var i = 0; i < micro_option_ids.length; i++){
+                    micro_html = micro_html.concat(`<option value=${micro_option_ids[i]}>${micro_option_names[i]}</option>`);
                 }   
-                html = html.concat(`</select><input type="number" min="0" name="micro_dv[]" style="width:3em"/>% <a href="#" class="delete-micro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
-                $(wrapper).append(html); //add input box
+                micro_html = micro_html.concat(`</select><input type="number" min="0" name="micro_dv[]" style="width:3em"/>% <a href="#" class="delete-micro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
+                $(micro_wrapper).append(micro_html); //add input box
+                num_micros++;
             } else {
                 alert('No more micronutrients available')
             }
         });
-
-        $(wrapper).on("click", ".delete-micro", function(e) {
+        // function to remove form fields for micronutrients
+        $(micro_wrapper).on("click", ".delete-micro", function(e) {
             e.preventDefault();
             $(this).parent('div').remove();
             x--;
-        })
+        });
+
+        // function to add form fields for foods
+        $(add_foods).click(function(e) {
+            e.preventDefault();
+            // allow append to execute as long as x is less than the number of macronutrients
+            if (num_foods < food_option_ids.length) {      
+                var food_html = `<div><select class="form-control" name="food_id[]">`;
+                for(var i = 0; i < food_option_ids.length; i++){
+                    food_html = food_html.concat(`<option value=${food_option_ids[i]}>${food_option_names[i]}</option>`);
+                }   
+                food_html = food_html.concat(`</select><input type="number" min="1" name="servings[]" style="width:3em"/> Serving(s) <a href="#" class="delete-food"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
+                $(food_wrapper).append(food_html); //add input box
+                num_foods++;
+            } else {
+                alert('No more food options available')
+            }
+        });
+        // function to remove form fields for foods
+        $(food_wrapper).on("click", ".delete-food", function(e) {
+            e.preventDefault();
+            $(this).parent('div').remove();
+            x--;
+        });
     });
     </script>
 <?php include_once '../templates/footer.php';

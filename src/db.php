@@ -549,7 +549,7 @@ class DB {
         }
         return $macro_calories;
     }
-    
+
     /*
      * Fetch all macronutrients from the database
      * 
