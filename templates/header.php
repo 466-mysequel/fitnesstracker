@@ -15,6 +15,7 @@ include_once '../src/library.php';
     <!-- Bootstrap: -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
+
 html {
     position: relative;
     min-height: 100%;
