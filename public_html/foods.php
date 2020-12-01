@@ -49,13 +49,21 @@ if(isset($_GET['action'])):
 } ?>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <form method="POST">
-            <h3>Keep track of your meals</h3>
+            <h3 class="mt-3">Keep track of your meals</h3>
             <div class="form-row">
-                <div class="form-group col-md-10">
-                    <label for="date" class="col-form-label"><h4>Date</h4></label>
-                    <input class="form-control" type="date" id="date" name="date">
-                    <label for="time" class="col-form-label"><h4>Time</h4></label>
-                    <input class="form-control" type="time" id="time" name="time">
+                <div class="form-group col-md-10 form-inline">
+                    <div class="input-group mb-3 input-group-lg">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="date">Date:</span>
+                        </div>
+                        <input class="form-control" type="date" id="date" name="date">
+                    </div>
+                    <div class="input-group mb-3 input-group-lg">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="date">Time</span>
+                        </div>
+                        <input class="form-control" type="time" id="time" name="time">
+                    </div>
                 </div>
                 <div class="form-group col-md-10">
                     <div class="foods">
