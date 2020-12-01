@@ -672,5 +672,83 @@ class DB {
         }
         return $micros;
     }
+
+    /**
+     * Get a list of meals
+     * 
+     * The return value is in this format:
+     * 
+     * [
+     *     {
+     *         "datetime": "2021-01-08 19:04:00",
+     *         "unixtime": "1610154240",
+     *         "foods": [
+     *             {
+     *                 "name": "Chik-Fil-A Chocolate Milkshake (small)",
+     *                 "calories": "1220"
+     *             }
+     *         ]
+     *     },
+     *     {
+     *         "datetime": "2020-11-12 19:26:35",
+     *         "unixtime": "1605230795",
+     *         "foods": [
+     *             {
+     *                 "name": "large egg",
+     *                 "calories": "249"
+     *             },
+     *             {
+     *                 "name": "swiss cheese",
+     *                 "calories": "72"
+     *             },
+     *             {
+     *                 "name": "Lette Caramel Macaron",
+     *                 "calories": "90"
+     *             }
+     *         ]
+     *     },
+     * 
+     * @param int user_id The user ID
+     * @param int timestamp If you want to get a single meal
+     * @return array
+     * @example get_meals(1)
+     */
+    function get_meals(int $user_id, ?int $timestamp = null): array {
+        $times = [];
+        if(is_null($timestamp)) {
+            $times = $this->query("SELECT date AS datetime, UNIX_TIMESTAMP(date) AS unixtime FROM food_log WHERE user_id = ? GROUP BY date ORDER BY date DESC", [$user_id])->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            $times[] = ['datetime' => $this->query("SELECT FROM_UNIXTIME(?)", [$timestamp])->fetchColumn(), 'unixtime' => $timestamp];
+        }
+        $sql = <<<SQL
+        SELECT food.name, calories_per_serving*servings AS calories
+        FROM food_log
+        INNER JOIN food ON food.id = food_id
+        WHERE user_id = ? AND `date` = ?
+        SQL;
+        $sumsql = <<<SQL
+        SELECT 'Total' as name, SUM(calories_per_serving*servings) AS calories
+        FROM food_log
+        INNER JOIN food ON food.id = food_id
+        WHERE user_id = ? AND `date` = ?
+        GROUP BY user_id,date
+        SQL;
+        $stmt = $this->pdo->prepare($sql);
+        $sumstmt = $this->pdo->prepare($sumsql);
+        $meals = [];
+        foreach($times as $time) {
+            $stmt->execute([$user_id, $time['datetime']]);
+            $foods = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $sumstmt->execute([$user_id, $time['datetime']]);
+            $foods[] = $sumstmt->fetch(PDO::FETCH_ASSOC);
+            $meals[] = [
+                'datetime' => $time['datetime'],
+                'unixtime' => (int)$time['unixtime'],
+                'foods' => $foods
+            ];
+        }
+        //echo "</div></div></div><br><h1>JSON</h1><pre>" . json_encode($meals, JSON_PRETTY_PRINT) . "</pre><div>";
+        return $meals;
+    }
 }
 ?>

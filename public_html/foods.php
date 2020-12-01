@@ -72,11 +72,22 @@ if(isset($_GET['action'])):
             </div>
         </form>
 <?php   break;
-        case 'history': ?>
-        <h2>Your meal history</h2>
-        <div class="row">
-        </div>
-<?php   break;
+        case 'history':
+            if(isset($_GET['timestamp'])):
+                echo "        <h3 class=\"mt-3\"><a href=\"?action=history\">Your meal history</a> &rsaquo; Your meal on " . date('h:i:s A l, jS \of F Y', (int)$_GET['timestamp']) . "</h3>\n";
+                $meals = $db->get_meals((int)$_SESSION['user_id'], (int)$_GET['timestamp']);
+                foreach($meals as $meal):
+                    draw_table($meal['foods'], ['name' => 'Food', 'calories' => 'Calories']);
+                endforeach;
+            else:
+                echo "        <h3 class=\"mt-3\">Your meal history</h2>\n";
+                $meals = $db->get_meals((int)$_SESSION['user_id']);
+                foreach($meals as $meal):
+                    echo "\n            <h5 class=\"mt-3\"><a href=\"?action=history&timestamp=" . $meal['unixtime'] . "\">". date('h:i:s A l, jS \of F Y', $meal['unixtime']) . "</a></h3>\n";
+                    draw_table($meal['foods'], ['name' => 'Food', 'calories' => 'Calories']);
+                endforeach;
+            endif;
+        break;
         case 'browse':
             if(isset($_GET['id'])):
                 $food = $db->get_food((int) $_GET['id']);
