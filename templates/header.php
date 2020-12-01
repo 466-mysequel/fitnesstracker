@@ -51,6 +51,12 @@ body {
                         </li>
                         <?php if(is_authenticated()): ?>
                         <li class="nav-item">
+                            <a class="nav-link<?php if(strpos($_SERVER['REQUEST_URI'], "/foods.php") !== false) echo " current" ?>" title="Foods" alt="Foods" href="foods.php">Foods</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link<?php if(strpos($_SERVER['REQUEST_URI'], "/workouts.php") !== false) echo " current" ?>" title="Workouts" alt="Workouts" href="workouts.php">Workouts</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link<?php if(strpos($_SERVER['REQUEST_URI'], "/myaccount.php") !== false) echo " current" ?>" title="My account" alt="My account" href="account.php">My account</a>
                         </li>
                         <li class="nav-item">

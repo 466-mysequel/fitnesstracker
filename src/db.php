@@ -350,7 +350,11 @@ class DB {
         string $intensity,
         ?string $description = null
     ): int {
-        if(is_null($description)) {
+        // Don't allow empty strings for these
+        if(empty($mets_value) || empty($category) || empty($activity) || empty($intensity))
+            return -1;
+        // Allow empty description
+        if(empty($description)) {
             $description = "$activity, $intensity";
         }
         // Prepare insert statement
@@ -422,7 +426,7 @@ class DB {
         $names = array();
         $rows = $this->query($sql, ["%$search%"])->fetchAll(PDO::FETCH_ASSOC);
         foreach($rows as $row) {
-            $names[$row['id']] = $row['name'];
+            $names[$row['id']] = $row['activity'];
         }
         return $names;
     }
@@ -447,49 +451,63 @@ class DB {
         // Prepare statement
         $stmt = $this->pdo->prepare($sql);
         // foreach food as food_id
-        foreach($foods as $key=>$food_id)                                          
+        foreach($foods as $key=>$food_id)
         {
             //execute statement
-            $stmt ->execute(array($user_id, $foods[$key], $servings[$key]));   
+            $stmt->execute(array($user_id, $foods[$key], $servings[$key]));
         }
         return;
     }
 
     /**
      * Add a new row to the weight_log table
-     *
-     * The database will use the NOW() function for the time
      * 
-     * @author z1868762 HR0102
+     * @author @z1868762 @HR0102 @zgjs
      * @param user_id The user's ID
      * @param weight_kg The user's current weight in kg
+     * @param int|string date either the unix timestamp, a string in the format YYYY-MM-DD hh:mm:ss, or null to use the current time
      * @return void
      * @example log_weight(1, 100.0)
      * @see "Project issue #27"
      */
-    function log_weight(int $user_id, float $weight_kg) 
+    function log_weight(int $user_id, float $weight_kg, $date = null) 
     {
-        $sql = "INSERT INTO weight_log(`date`, `user_id`, `weight_kg`) VALUES (NOW(), ?, ?)";
-        $pdo = $this -> query($sql, [$user_id, $weight_kg]);
+        if(is_null($date)) {
+            $sql = "INSERT INTO weight_log(`date`, `user_id`, `weight_kg`) VALUES (NOW(), ?, ?)";
+            $this->query($sql, [$user_id, $weight_kg]);
+        } elseif (is_int($date)) {
+            $sql = "INSERT INTO weight_log(`date`, `user_id`, `weight_kg`) VALUES (FROM_UNIXTIME(?), ?, ?)";
+            $this->query($sql, [$date, $user_id, $weight_kg]);
+        } elseif (is_string($date) && !empty($date)) {
+            $sql = "INSERT INTO weight_log(`date`, `user_id`, `weight_kg`) VALUES (?, ?, ?)";
+            $this->query($sql, [$date, $user_id, $weight_kg]);
+        }
         return;
     }
     
     /**
      * Add a workout to the workout_log table
-     *
-     * The database will use the NOW() function for the time
      * 
-     * @author z1868762 HR0102
+     * @author @z1868762 @HR0102 @zgjs
      * @param user_id The user's ID
      * @param workout_type_id The id of the workout_type
      * @param duration_secs The duration of the workout
+     * @param int|string date either the unix timestamp, a string in the format YYYY-MM-DD hh:mm:ss, or null to use the current time
      * @return void
      * @example log_workout(1,1,1)
      * @see "Project issue #27"
      */
-    function log_workout(int $user_id, int $workout_type_id, int $duration_secs) {
-        $sql = "INSERT INTO workout_log(`date`, `user_id`, `workout_type_id`,`duration_seconds`) VALUES (NOW(), ?, ?, ?)";
-        $pdo = $this -> query($sql, [$user_id, $workout_type_id, $duration_secs]);
+    function log_workout(int $user_id, int $workout_type_id, int $duration_sec, $date = null) {
+        if(is_null($date)) {
+            $sql = "INSERT INTO workout_log(`date`, `user_id`, `workout_type_id`,`duration_seconds`) VALUES (NOW(), ?, ?, ?)";
+            $this->query($sql, [$user_id, $workout_type_id, $duration_secs]);
+        } elseif (is_int($date)) {
+            $sql = "INSERT INTO workout_log(`date`, `user_id`, `workout_type_id`,`duration_seconds`) VALUES (FROM_UNIXTIME(?), ?, ?, ?)";
+            $this->query($sql, [$date, $user_id, $workout_type_id, $duration_secs]);
+        } elseif (is_string($date) && !empty($date)) {
+            $sql = "INSERT INTO workout_log(`date`, `user_id`, `workout_type_id`,`duration_seconds`) VALUES (?, ?, ?, ?)";
+            $this->query($sql, [$date, $user_id, $workout_type_id, $duration_secs]);
+        }
         return;
     }
 
