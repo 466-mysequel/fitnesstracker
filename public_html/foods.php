@@ -6,7 +6,13 @@ error_reporting(E_ALL);
 include_once '../src/db.php';
 $db = new DB();
 include_once '../src/library.php';
-require_signed_in(); 
+require_signed_in();
+if(isset($_GET['action']) && $_GET['action'] == 'log' && isset($_POST['food_id']) && isset($_POST['servings'])) {
+    $log_food_timestamp = $db->log_food($_SESSION['user_id'], $_POST['food_id'], $_POST['servings'], $_POST['date'] . ' ' . $_POST['time']);
+    if($log_food_timestamp > 0) {
+        redirect("foods.php?action=history&timestamp=" . $log_food_timestamp, "Your food was logged successfully");
+    }
+}
 $page_title = "Fitness Tracker &rsaquo; Foods";
 $result=NULL;
 $stylesheets = ['css/nutrition-facts.css'];
@@ -42,14 +48,11 @@ include_once '../templates/header.php';
 <?php
 if(isset($_GET['action'])):
     switch($_GET['action']):
-        case 'log': ?>
-
-<?php if(isset($_SESSION['user_id']) && isset($_POST['food_id']) && isset($_POST['servings'])) {
-    $result = $db->log_food($_SESSION['user_id'],$_POST['food_id'],$_POST['servings'],$_POST['date'] . ' ' . $_POST['time']);
-} ?>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        case 'log':
+?>
         <form method="POST">
-            <h3 class="mt-3">Keep track of your meals</h3>
+            <h3 class="mt-3">Log a meal</h3>
+            <p class="lead"><?php echo (isset($log_food_timestamp)  ? "There was a problem logging your meal." : "Please enter the information about your meal, including one or more foods."); ?></p>
             <div class="form-row">
                 <div class="form-group col-md-10 form-inline">
                     <div class="input-group mb-3 input-group-lg">

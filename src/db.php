@@ -463,12 +463,12 @@ class DB {
      * @param user_id The user's ID
      * @param int[] foods An array of food_ids
      * @param double[] servings An array of how many searvings for each food_id
-     * @return bool
+     * @return int
      * @example log_food(1, [1], [1])
      * @example log_food(1, [1,2,3], [1,2,1])
      * @see "Project issue #27"
      */
-    function log_food(int $user_id, array $foods, array $servings, $date = null) :bool {
+    function log_food(int $user_id, array $foods, array $servings, $date = null): int {
         $last_result;
         if(is_null($date) || empty($date)){
             $sql = "INSERT INTO food_log(`date`,`user_id`,`food_id`,`servings`) VALUES (NOW(),?,?,?)";
@@ -477,7 +477,10 @@ class DB {
             for($i = 0; $i < count($foods); $i++) {
                 //execute statement
                 $last_result = $stmt->execute([$user_id, $foods[$i], $servings[$i]]);
-            }      
+            }
+            if($last_result) {
+                return time();
+            }
         } else {
             $sql = "INSERT INTO food_log(`date`,`user_id`,`food_id`,`servings`) VALUES (?,?,?,?)";
             $stmt = $this->pdo->prepare($sql);
@@ -486,8 +489,11 @@ class DB {
                 //execute statement
                 $last_result = $stmt->execute([$date, $user_id, $foods[$i], $servings[$i]]);
             }
+            if($last_result) {
+                return (int) $this->query("SELECT UNIX_TIMESTAMP(?)", [$date])->fetchColumn();
+            }
         }
-        return $last_result;
+        return -1;
     }
 
     /**
