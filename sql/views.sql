@@ -85,3 +85,38 @@ WHERE nutrient_id IN(1,4,6,7)
 AND DATE(date) = CURDATE()
 GROUP BY user_id,nutrient_id;
 \! echo " * macro_totals_today"
+# View: Macronutrients
+CREATE VIEW macronutrients AS
+SELECT * FROM nutrient WHERE id IN (1,4,6,7);
+\! echo " * macronutrients"
+# View: Micronutrients
+CREATE VIEW micronutrients AS
+SELECT * FROM nutrient WHERE rdv_unit != 'g';
+\! echo " * micronutrients"
+# View: Micro totals monthly
+CREATE VIEW micro_totals_monthly AS
+SELECT user_id,nutrient_id,sum(servings*percent_dv) AS micro_total_percent
+FROM food_log
+INNER JOIN micronutrient_content USING (food_id)
+WHERE nutrient_id IN(SELECT nutrient_id FROM micronutrients)
+AND date BETWEEN DATE_SUB(NOW(),INTERVAL 31 DAY) AND NOW()
+GROUP BY user_id,nutrient_id;
+\! echo " * micro_totals_monthly"
+# View: Micro totals weekly
+CREATE VIEW micro_totals_weekly AS
+SELECT user_id,nutrient_id,sum(servings*percent_dv) AS micro_total_percent
+FROM food_log
+INNER JOIN micronutrient_content USING (food_id)
+WHERE nutrient_id IN(SELECT nutrient_id FROM micronutrients)
+AND date BETWEEN DATE_SUB(NOW(),INTERVAL 7 DAY) AND NOW()
+GROUP BY user_id,nutrient_id;
+\! echo " * micro_totals_weekly"
+# View: Micro totals today
+CREATE VIEW micro_totals_today AS
+SELECT user_id,nutrient_id,sum(servings*percent_dv) AS micro_total_percent
+FROM food_log
+INNER JOIN micronutrient_content USING (food_id)
+WHERE nutrient_id IN(SELECT nutrient_id FROM micronutrients)
+AND DATE(date) = CURDATE()
+GROUP BY user_id,nutrient_id;
+\! echo " * micro_totals_today"
