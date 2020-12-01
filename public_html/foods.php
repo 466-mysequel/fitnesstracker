@@ -5,7 +5,8 @@ ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
 include_once '../src/db.php';
 $db = new DB();
-include_once '../src/library.php'; 
+include_once '../src/library.php';
+require_signed_in(); 
 $page_title = "Fitness Tracker &rsaquo; Foods";
 $result=NULL;
 include_once '../templates/header.php';
@@ -32,15 +33,17 @@ if(isset($_GET['action'])):
         case 'log': ?>
 
 <?php if(isset($_SESSION['user_id']) && isset($_POST['food_id']) && isset($_POST['servings'])) {
-    $result = $db->log_food($_SESSION['user_id'],$_POST['food_id'],$_POST['servings']);
+    $result = $db->log_food($_SESSION['user_id'],$_POST['food_id'],$_POST['servings'],$_POST['date'] . ' ' . $_POST['time']);
 } ?>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <form method="POST">
             <h3>Keep track of your meals</h3>
             <div class="form-row">
                 <div class="form-group col-md-10">
-                    <label for="mealtime" class="col-form-label"><h4>Date and time</h4></label>
-                    <input class="form-control" type="datetime-local" value="" id="mealtime" name="date">
+                    <label for="date" class="col-form-label"><h4>Date</h4></label>
+                    <input class="form-control" type="date" id="date" name="date">
+                    <label for="time" class="col-form-label"><h4>Time</h4></label>
+                    <input class="form-control" type="time" id="time" name="time">
                 </div>
                 <div class="form-group col-md-10">
                     <div class="foods">

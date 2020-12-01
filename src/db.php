@@ -450,23 +450,31 @@ class DB {
      * @param user_id The user's ID
      * @param int[] foods An array of food_ids
      * @param double[] servings An array of how many searvings for each food_id
-     * @return void
+     * @return bool
      * @example log_food(1, [1], [1])
      * @example log_food(1, [1,2,3], [1,2,1])
      * @see "Project issue #27"
      */
-    function log_food(int $user_id, array $foods, array $servings) 
-    {
-        $sql = "INSERT INTO food_log(`date`,`user_id`,`food_id`,`servings`) VALUES (NOW(),?,?,?)";
-        // Prepare statement
-        $stmt = $this->pdo->prepare($sql);
-        // foreach food as food_id
-        foreach($foods as $key=>$food_id)
-        {
-            //execute statement
-            $stmt->execute(array($user_id, $foods[$key], $servings[$key]));
+    function log_food(int $user_id, array $foods, array $servings, $date = null) :bool {
+        $last_result;
+        if(is_null($date) || empty($date)){
+            $sql = "INSERT INTO food_log(`date`,`user_id`,`food_id`,`servings`) VALUES (NOW(),?,?,?)";
+            $stmt = $this->pdo->prepare($sql);
+            // execute until you have reached the end of the inputs
+            for($i = 0; $i < count($foods); $i++) {
+                //execute statement
+                $last_result = $stmt->execute([$user_id, $foods[$i], $servings[$i]]);
+            }      
+        } else {
+            $sql = "INSERT INTO food_log(`date`,`user_id`,`food_id`,`servings`) VALUES (?,?,?,?)";
+            $stmt = $this->pdo->prepare($sql);
+            // execute until you have reached the end of the inputs
+            for($i = 0; $i < count($foods); $i++) {
+                //execute statement
+                $last_result = $stmt->execute([$date, $user_id, $foods[$i], $servings[$i]]);
+            }
         }
-        return;
+        return $last_result;
     }
 
     /**
