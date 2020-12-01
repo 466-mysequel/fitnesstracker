@@ -39,17 +39,31 @@ HTML;
 ?>
     <!-- Page Content -->
 
-    <?php if(is_authenticated()): ?>
-        <div class="jumbotron text-center">
-            <h1><?php echo $page_title; ?></h1>
-        </div>
+    <?php if(is_authenticated()):
+    $user = $db->get_user($_SESSION['user_id']); 
+
+?>
         <main role="main" class="container">
-            <?php $rows=$db->get_latest_workout((int) $_SESSION['user_id']);
+            <h1> Hello <?php echo $user['first_name'] . ' ' . $user['last_name']; ?> </h1>
+            <div class="container">
+            <div class="row">
+                <div class="col">
+                <?php $rows=$db->get_latest_workout((int) $_SESSION['user_id']);
                 echo "<h1><b>Your Latest Workout:</b></h1> <br>";
                 foreach($rows as $row){
-                    echo "<p>". $row['date']. "<br>" . $row['category']. "<br>" . $row['activity'] . "</p>";
+                    echo "<i><p>". $row['date']. "<br>" . $row['category']. "<br>" . $row['activity'] . "</p></i>";
+                }
+                ?>
+                </div>
+                <div class="col"> 
+                <?php $rows=$db->get_latest_workout((int) $_SESSION['user_id']);
+                echo "<h1><b>Your Latest Workout:</b></h1> <br>";
+                foreach($rows as $row){
+                    echo "<i><p>". $row['date']. "<br>" . $row['category']. "<br>" . $row['activity'] . "</p></i>";
                 }
             ?>
+            </div>
+            </div>
         </main>
     <?php else: ?>
         <div class="signed-out">
