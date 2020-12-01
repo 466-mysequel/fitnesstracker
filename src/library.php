@@ -23,7 +23,8 @@
  * @example draw_table($rows, ['status' => 'Enrollment Status', 'name' => 'Student Name']) // prints table in the order of the associative array keys, and with pretty names matching the associative array values
  */
 function draw_table(array &$rows, ?array $headers = NULL) {
-    echo "        <table border=1 colspan=1>\n";
+    echo "    <table border=1 colspan=1 class=\"table-striped\">\n";
+    echo "        <thead>\n";
     echo "            <tr>\n                ";
     if (is_null($headers)) {
         // If the headers parameter was not specified, use database column names as table headers
@@ -44,6 +45,8 @@ function draw_table(array &$rows, ?array $headers = NULL) {
             echo "<th>$value</th>";
         }
         echo "\n            </tr>\n";
+        echo "\n        </thead>\n";
+        echo "\n        <tbody>\n";
         foreach ($rows as $row) {
             echo "            <tr>\n                ";
             foreach (array_keys($headers) as $key) {
@@ -51,10 +54,12 @@ function draw_table(array &$rows, ?array $headers = NULL) {
             }
             echo "\n            </tr>\n";
         }
-        echo "        </table>\n";
+        echo "        </tbody>\n";
+        echo "     </table>\n";
         return;
     }
     echo "\n            </tr>\n";
+    echo "\n         </thead>\n";
     foreach ($rows as $row) {
         echo "            <tr>\n                ";
         foreach ($row as $td) {
@@ -62,7 +67,8 @@ function draw_table(array &$rows, ?array $headers = NULL) {
         }
         echo "\n            </tr>\n";
     }
-    echo "        </table>\n";
+    echo "        </tbody>\n";
+    echo "     </table>\n";
 }
 
 /**
