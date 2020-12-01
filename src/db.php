@@ -142,9 +142,19 @@ class DB {
         // Prepare statement
         $sql = "INSERT INTO nutrient (name, rdv_amount, rdv_unit) VALUES (?, ?, ?)";
         // Execute statement;
-        $pdo = $this -> query($sql, [$name, $rdv_amount, $rdv_unit]);
-
-        return $this->pdo->lastInsertId();
+        if(!is_null($name) && !empty($name) && isset($rdv_amount) && (!is_null($rdv_amount) || floatval($rdv_amount) != 0) && !is_null($rdv_unit) && !empty($rdv_unit)){
+            $pdo = $this -> query($sql, [$name, $rdv_amount, $rdv_unit]);
+            return $this->pdo->lastInsertId();
+        }
+        else if(is_null($name) || empty($name)){
+            return -1; // no name
+        }
+        else if(is_null($rdv_unit) || empty($rdv_unit)) {
+            return -3; // no rdv unit 
+        }
+        else{
+            return -4; //some or all values are null or empty
+        }
     }
 
     /**
@@ -512,6 +522,7 @@ class DB {
     }
 
     /**
+
      * To get the macro percentages from the macro totals view
      * 
      * @author @z1868762 @HR0102 @zgjs
@@ -556,7 +567,33 @@ class DB {
         }
         return $macro_calories;
     }
+
+    /*
+     * Fetch all macronutrients from the database
+     * 
+     * @return array an array of macronutrient IDs and Names
+     * @example $array_result = get_macronutrients()
+     * @see "Project issue #2336"
+     */
+    function get_macronutrients() :array {
+        $sql = "SELECT id,name FROM nutrient WHERE id IN(1,4,6,7)";
+        $stmt = $this->query($sql);
+        $array_results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $array_results;
+    }
+
+    /**
+     * Fetch all micronutrients from the database
+     * 
+     * @return array an array of micronutrient IDs and Names
+     * @example $array_result = get_micronutrients()
+     * @see "Project issue #2336"
+     */
+    function get_micronutrients() :array {
+        $sql = "SELECT id,name FROM nutrient WHERE id NOT IN(1,4,6,7)";
+        $stmt = $this->query($sql);
+        $array_results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $array_results;
+    }
 }
-
-
 ?>
