@@ -10,11 +10,17 @@ include_once '../src/db.php';
 include_once '../src/library.php';
 
 require_signed_in();
+$db = new DB();
+if(isset($_POST['intensity']) && !empty($_POST['intensity'])) {
+    $timestamp = $db->log_workout($_SESSION['user_id'], (int) $_POST['intensity'], 60 * $_POST['duration'], $_POST['date'] . ' ' . $_POST['time']);
+    if($timestamp > 0) {
+        redirect("workouts.php?action=history&timestamp=$timestamp", "Workout activity added successfully.");
+    }
+}
 
 // Start writing the page
 $page_title = "Workouts";
 include '../templates/header.php';
-$db = new DB();
 ?>
 
     <!-- Page Content -->
@@ -38,10 +44,130 @@ if(isset($_GET['action'])):
     switch($_GET['action']):
         case 'log': ?>
         <h1>Log a workout activity</h1>
-        <div class="row">
-        </div>
+        <?php if(isset($timestamp)) {
+            echo "<p class=lead>There was a problem logging the working. Please <a href=\"javascript:history.back();\">[Go Back]</a>.</p>\n";
+        } ?>
+        <form method="POST" class="form-inline">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="input-group input-group-lg">
+<?php
+            if(isset($_POST['intensity']) && !empty($_POST['intensity'])):
+                $timestamp = $db->log_workout($_SESSION['user_id'], (int) $_POST['intensity'], 60 * $_POST['duration'], $_POST['date'] . ' ' . $_POST['time']);
+                if($timestamp > 0) {
+                    redirect("workouts.php?action=history&timestamp=$timestamp", "Workout activity added successfully.");
+                }
+
+?>
+<?php
+            elseif(isset($_POST['activity']) && !empty($_POST['activity'])):
+                $activities = $db->query("SELECT id,intensity FROM workout_type WHERE activity = ? GROUP BY id", [$_POST['activity']])->fetchAll(PDO::FETCH_ASSOC);?>
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="intensity">intensity</span>
+                        </div>
+                        <select class="form-control" name="intensity" id="intensity" required>
+                            <option value="" disabled selected hidden>Intensity</option>
+<?php               foreach($activities as $activity) {
+                        echo "                            <option value=\"{$activity['id']}\">".ucwords($activity['intensity'])."</option>\n";
+                    }
+?>
+                        </select>
+                    </div>
+                    <div class="input-group input-group-lg">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="date">Date</span>
+                        </div>
+                        <input type="date" id="date" name="date" aria-label="Date" class="form-control" required>
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="time">Time</span>
+                        </div>
+                        <input type="time" id="time" name="time" aria-label="Time" class="form-control" required>
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="duration">Duration (minutes)</span>
+                        </div>
+                        <input type="number" id="duration" name="duration" aria-label="Duration (minutes)" class="form-control" required>
+                    </div>
+                    <div class="input-group input-group-lg">
+                        <input class="form-control btn btn-primary btn-lg" type="submit">
+                    </div>
+<?php
+
+            elseif(isset($_POST['category']) && !empty($_POST['category'])):
+                $activities = $db->query("SELECT DISTINCT activity FROM workout_type WHERE category = ?", [$_POST['category']])->fetchAll(PDO::FETCH_COLUMN);
+?>
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="activity">Activity</span>
+                        </div>
+                        <select class="form-control" name="activity" id="activity" required>
+                            <option value="" disabled selected hidden>Activity</option>
+<?php               foreach($activities as $activity) {
+                        echo "                            <option value=\"$activity\">".ucwords($activity)."</option>\n";
+                    }
+?>
+                        </select>
+                    </div>
+                    <div class="input-group input-group-lg">
+                        <button class="form-control btn btn-primary btn-lg" type="submit">Next</button>
+                    </div>
+<?php
+            else:
+?>
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="category">Category</span>
+                        </div>
+                        <select class="form-control" name="category" id="category" required>
+                            <option value="" disabled selected hidden>Category</option>
+                            <option value="bicycling">Bicycling</option>
+                            <option value="conditioning excerise">Conditioning Excerise</option>
+                            <option value="dancing">Dancing</option>
+                            <option value="fishing and hunting">Fishing/Hunting </option>
+                            <option value="home activites">Home activites </option>
+                            <option value="home repair">Home repair </option>
+                            <option value="lawn and garden">Lawn and Garden</option>
+                            <option value="inactivity quiet/light">Light activities</option>
+                            <option value="miscellaneous">Miscellaneous</option>
+                            <option value="occupation">Occupation</option>
+                            <option value="music playing">Playing Music </option>
+                            <option value="religious activities">Religious Activities </option>
+                            <option value="running">Running</option>
+                            <option value="self care">Self care</option>
+                            <option value="sexual activity">Sexual activity</option>
+                            <option value="sports">Sports</option>
+                            <option value="transportation">Transportation</option>
+                            <option value="walking">Walking</option>
+                            <option value="water activities">Water Activites</option>
+                            <option value="winter activities">Winter Activities</option>
+                            <option value="volunteer activities">Volunteer Work</option>
+                        </select>
+                    </div>
+                    <div class="input-group input-group-lg">
+                        <button class="form-control btn btn-primary btn-lg" type="submit">Next</button>
+                    </div>
+        <?php endif; ?>
+                </div>
+            </div>
+        </form>
+     <pre><?php if ($_SERVER['REQUEST_METHOD'] === 'POST') var_dump($_POST); ?></pre>
 <?php   break;
-        case 'history': ?>
+        case 'history':
+            $workouts = [];
+            if(isset($_GET['timestamp'])) {
+                echo "<h2>Workout added successfully</h2>";
+                $workouts = $db->get_workouts($_SESSION['user_id'], (int)$_GET['timestamp']);
+            } else {
+                echo "<h2>Your workout history</h2>";
+                $workouts = $db->get_workouts($_SESSION['user_id']);
+            }
+            $headers = [
+                'date' => 'Date of workout',
+                'duration_minutes' => 'Duration (minutes)',
+                'category' => 'Category',
+                'activity' => 'Activity',
+                'intensity' => 'Intensity',
+                'calories_burned' => 'Calories burned'
+            ];
+            draw_table($workouts, $headers, );
+?>
         <h1>Your workout history</h1>
         <div class="row">
         </div>
