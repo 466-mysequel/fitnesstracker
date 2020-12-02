@@ -64,7 +64,7 @@ SELECT user_id,nutrient_id,sum(servings*amount) AS macro_total_g
 FROM food_log
 INNER JOIN macronutrient_content USING (food_id)
 WHERE nutrient_id IN(1,4,6,7)
-AND date BETWEEN DATE_SUB(NOW(),INTERVAL 31 DAY) AND NOW()
+AND DATE(date) BETWEEN DATE_SUB(NOW(),INTERVAL 31 DAY) AND NOW()
 GROUP BY user_id,nutrient_id;
 \! echo " * macro_totals_monthly"
 # View: Macro totals weekly
@@ -73,7 +73,7 @@ SELECT user_id,nutrient_id,sum(servings*amount) AS macro_total_g
 FROM food_log
 INNER JOIN macronutrient_content USING (food_id)
 WHERE nutrient_id IN(1,4,6,7)
-AND date BETWEEN DATE_SUB(NOW(),INTERVAL 7 DAY) AND NOW()
+AND DATE(date) BETWEEN DATE_SUB(NOW(),INTERVAL 7 DAY) AND NOW()
 GROUP BY user_id,nutrient_id;
 \! echo " * macro_totals_weekly"
 # View: Macro totals today

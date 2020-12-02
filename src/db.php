@@ -577,22 +577,22 @@ class DB {
                   'protein' => '7'];
         $sql = 'SELECT nutrient_id, macro_total_g FROM ' . $views[$period] . ' WHERE user_id = ?';
         $rows = $this->query($sql, [$user_id])->fetchAll(PDO::FETCH_ASSOC);
-        $macro_calories = [];
+        $macro_calories = [["Macronutrient","Calories"]];
         foreach($rows as $row)
         {
             switch($row['nutrient_id'])
             {
                 case $macro['fat']:
-                    $macro_calories['fat'] = $row['macro_total_g'] * 9;
+                    $macro_calories[] = ['Fat',$row['macro_total_g'] * 9];
                     break;
                 case $macro['carbs']:
-                    $macro_calories['carbs'] = $row['macro_total_g'] * 4;
+                    $macro_calories[] = ['Carbohydrates',$row['macro_total_g'] * 4];
                     break;
                 case $macro['fiber']:
-                    $macro_calories['fiber'] = $row['macro_total_g'] * 2;
+                    $macro_calories[] = ['Dietary fiber',$row['macro_total_g'] * 2];
                     break;
                 case $macro['protein']:
-                    $macro_calories['protein'] = $row['macro_total_g'] * 4;
+                    $macro_calories[] = ['Protein',$row['macro_total_g'] * 4];
                     break;
             }
         }
@@ -759,6 +759,39 @@ class DB {
         }
         //echo "</div></div></div><br><h1>JSON</h1><pre>" . json_encode($meals, JSON_PRETTY_PRINT) . "</pre><div>";
         return $meals;
+    }
+
+    /**
+     * Get food totals
+     */
+    function get_food_totals(int $user_id, string $start_date, string $stop_date) {
+        $sql = <<<SQL
+        SELECT
+            f.name AS 'food',
+            COUNT(*) AS 'meals',
+            SUM(t.servings) AS 'servings',
+            f.calories_per_serving AS 'calories_per_serving',
+            SUM(t.servings) * f.calories_per_serving AS 'calories',
+            CONCAT(SUM(CASE WHEN n.id = 1 THEN mi.amount * t.servings ELSE '0' END), ' g') as 'fat',
+            CONCAT(SUM(CASE WHEN n.id = 4 THEN mi.amount * t.servings ELSE '0' END), ' g') as 'carbs',
+            CONCAT(SUM(CASE WHEN n.id = 7 THEN mi.amount * t.servings ELSE '0' END), ' g') as 'protein',
+            CONCAT(SUM(CASE WHEN n.id = 6 THEN mi.amount * t.servings ELSE '0' END), ' g') as 'fiber'
+        FROM food_log t 
+        INNER JOIN macronutrient_content mi ON mi.food_id = t.food_id
+        INNER JOIN user u ON u.id = t.user_id 
+        INNER JOIN food f ON f.id = t.food_id 
+        INNER JOIN nutrient n ON n.id = mi.nutrient_id
+        WHERE user_id = :user_id AND DATE(t.date) BETWEEN :start_date AND :stop_date
+        GROUP BY t.user_id,t.food_id;
+        SQL;
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':user_id' => $user_id,
+            ':start_date' => $start_date,
+            ':stop_date' => $stop_date
+        ]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $rows;
     }
 
     /**
