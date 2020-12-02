@@ -528,24 +528,28 @@ class DB {
      * @author @z1868762 @HR0102 @zgjs
      * @param user_id The user's ID
      * @param workout_type_id The id of the workout_type
-     * @param duration_secs The duration of the workout
+     * @param duration_seconds The duration of the workout
      * @param int|string date either the unix timestamp, a string in the format YYYY-MM-DD hh:mm:ss, or null to use the current time
-     * @return void
+     * @return int
      * @example log_workout(1,1,1)
      * @see "Project issue #27"
      */
-    function log_workout(int $user_id, int $workout_type_id, int $duration_sec, $date = null) {
+    function log_workout(int $user_id, int $workout_type_id, int $duration_seconds, $date = null): int {
         if(is_null($date)) {
             $sql = "INSERT INTO workout_log(`date`, `user_id`, `workout_type_id`,`duration_seconds`) VALUES (NOW(), ?, ?, ?)";
-            $this->query($sql, [$user_id, $workout_type_id, $duration_secs]);
+            $stmt = $this->query($sql, [$user_id, $workout_type_id, $duration_secs]);
         } elseif (is_int($date)) {
             $sql = "INSERT INTO workout_log(`date`, `user_id`, `workout_type_id`,`duration_seconds`) VALUES (FROM_UNIXTIME(?), ?, ?, ?)";
-            $this->query($sql, [$date, $user_id, $workout_type_id, $duration_secs]);
+            $stmt = $this->query($sql, [$date, $user_id, $workout_type_id, $duration_secs]);
         } elseif (is_string($date) && !empty($date)) {
             $sql = "INSERT INTO workout_log(`date`, `user_id`, `workout_type_id`,`duration_seconds`) VALUES (?, ?, ?, ?)";
-            $this->query($sql, [$date, $user_id, $workout_type_id, $duration_secs]);
+            $stmt = $this->query($sql, [$date, $user_id, $workout_type_id, $duration_seconds]);
         }
-        return;
+        if($stmt->rowCount() > 0) {
+            return (int) $this->query("SELECT UNIX_TIMESTAMP(?)", [$date])->fetchColumn();
+        }
+        var_dump($this->pdo->errorInfo());
+        return -1;
     }
 
     /**
@@ -788,6 +792,28 @@ class DB {
         ]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $rows;
+    }
+
+    /**
+     * Get a list of workouts
+     * 
+     * @param int user_id The user ID
+     * @param int timestamp If you want to get a single workout
+     * @return array
+     * @example get_workouts(1)
+     */
+    function get_workouts(int $user_id, ?int $timestamp = null): array {
+        $sql = <<<SQL
+        SELECT date, duration_seconds/60 AS duration_minutes, category, activity, intensity, WEIGHT_AT_TIME(user_id, date) * mets_value * duration_seconds/3600 AS calories_burned
+        FROM workout_log
+        INNER JOIN workout_type ON workout_type.id = workout_type_id
+        WHERE user_id = ?
+        SQL;
+        if(is_null($timestamp)) {
+            return $this->query($sql, [$user_id])->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            return $this->query("$sql AND `date` = FROM_UNIXTIME(?)", [$user_id, $timestamp])->fetchAll(PDO::FETCH_ASSOC);
+        }
     }
 }
 ?>
