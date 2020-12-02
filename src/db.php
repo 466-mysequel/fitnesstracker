@@ -360,7 +360,11 @@ class DB {
         string $intensity,
         ?string $description = null
     ): int {
-        if(is_null($description)) {
+        // Don't allow empty strings for these
+        if(empty($mets_value) || empty($category) || empty($activity) || empty($intensity))
+            return -1;
+        // Allow empty description
+        if(empty($description)) {
             $description = "$activity, $intensity";
         }
         // Prepare insert statement
@@ -383,6 +387,19 @@ class DB {
     function get_current_weight(int $user_id): double {
         // 
         return (double)"0.0";
+    }
+    
+    
+    /**
+     * Get food
+     * 
+     * Get info about an food by ID
+     * @param id The ID for the food to get
+     * @return string[]
+     * @example get_food(1);
+     */
+    function get_food(int $id) {
+        return $this->query("SELECT * FROM food WHERE id = ?", [$id])->fetch(PDO::FETCH_ASSOC);
     }
     
     /**
@@ -432,7 +449,7 @@ class DB {
         $names = array();
         $rows = $this->query($sql, ["%$search%"])->fetchAll(PDO::FETCH_ASSOC);
         foreach($rows as $row) {
-            $names[$row['id']] = $row['name'];
+            $names[$row['id']] = $row['activity'];
         }
         return $names;
     }
@@ -446,60 +463,88 @@ class DB {
      * @param user_id The user's ID
      * @param int[] foods An array of food_ids
      * @param double[] servings An array of how many searvings for each food_id
-     * @return void
+     * @return int
      * @example log_food(1, [1], [1])
      * @example log_food(1, [1,2,3], [1,2,1])
      * @see "Project issue #27"
      */
-    function log_food(int $user_id, array $foods, array $servings) 
-    {
-        $sql = "INSERT INTO food_log(`date`,`user_id`,`food_id`,`servings`) VALUES (NOW(),?,?,?)";
-        // Prepare statement
-        $stmt = $this->pdo->prepare($sql);
-        // foreach food as food_id
-        foreach($foods as $key=>$food_id)                                          
-        {
-            //execute statement
-            $stmt ->execute(array($user_id, $foods[$key], $servings[$key]));   
+    function log_food(int $user_id, array $foods, array $servings, $date = null): int {
+        $last_result;
+        if(is_null($date) || empty($date)){
+            $sql = "INSERT INTO food_log(`date`,`user_id`,`food_id`,`servings`) VALUES (NOW(),?,?,?)";
+            $stmt = $this->pdo->prepare($sql);
+            // execute until you have reached the end of the inputs
+            for($i = 0; $i < count($foods); $i++) {
+                //execute statement
+                $last_result = $stmt->execute([$user_id, $foods[$i], $servings[$i]]);
+            }
+            if($last_result) {
+                return time();
+            }
+        } else {
+            $sql = "INSERT INTO food_log(`date`,`user_id`,`food_id`,`servings`) VALUES (?,?,?,?)";
+            $stmt = $this->pdo->prepare($sql);
+            // execute until you have reached the end of the inputs
+            for($i = 0; $i < count($foods); $i++) {
+                //execute statement
+                $last_result = $stmt->execute([$date, $user_id, $foods[$i], $servings[$i]]);
+            }
+            if($last_result) {
+                return (int) $this->query("SELECT UNIX_TIMESTAMP(?)", [$date])->fetchColumn();
+            }
         }
-        return;
+        return -1;
     }
 
     /**
      * Add a new row to the weight_log table
-     *
-     * The database will use the NOW() function for the time
      * 
-     * @author z1868762 HR0102
+     * @author @z1868762 @HR0102 @zgjs
      * @param user_id The user's ID
      * @param weight_kg The user's current weight in kg
+     * @param int|string date either the unix timestamp, a string in the format YYYY-MM-DD hh:mm:ss, or null to use the current time
      * @return void
      * @example log_weight(1, 100.0)
      * @see "Project issue #27"
      */
-    function log_weight(int $user_id, float $weight_kg) 
+    function log_weight(int $user_id, float $weight_kg, $date = null) 
     {
-        $sql = "INSERT INTO weight_log(`date`, `user_id`, `weight_kg`) VALUES (NOW(), ?, ?)";
-        $pdo = $this -> query($sql, [$user_id, $weight_kg]);
+        if(is_null($date)) {
+            $sql = "INSERT INTO weight_log(`date`, `user_id`, `weight_kg`) VALUES (NOW(), ?, ?)";
+            $this->query($sql, [$user_id, $weight_kg]);
+        } elseif (is_int($date)) {
+            $sql = "INSERT INTO weight_log(`date`, `user_id`, `weight_kg`) VALUES (FROM_UNIXTIME(?), ?, ?)";
+            $this->query($sql, [$date, $user_id, $weight_kg]);
+        } elseif (is_string($date) && !empty($date)) {
+            $sql = "INSERT INTO weight_log(`date`, `user_id`, `weight_kg`) VALUES (?, ?, ?)";
+            $this->query($sql, [$date, $user_id, $weight_kg]);
+        }
         return;
     }
     
     /**
      * Add a workout to the workout_log table
-     *
-     * The database will use the NOW() function for the time
      * 
-     * @author z1868762 HR0102
+     * @author @z1868762 @HR0102 @zgjs
      * @param user_id The user's ID
      * @param workout_type_id The id of the workout_type
      * @param duration_secs The duration of the workout
+     * @param int|string date either the unix timestamp, a string in the format YYYY-MM-DD hh:mm:ss, or null to use the current time
      * @return void
      * @example log_workout(1,1,1)
      * @see "Project issue #27"
      */
-    function log_workout(int $user_id, int $workout_type_id, int $duration_secs) {
-        $sql = "INSERT INTO workout_log(`date`, `user_id`, `workout_type_id`,`duration_seconds`) VALUES (NOW(), ?, ?, ?)";
-        $pdo = $this -> query($sql, [$user_id, $workout_type_id, $duration_secs]);
+    function log_workout(int $user_id, int $workout_type_id, int $duration_sec, $date = null) {
+        if(is_null($date)) {
+            $sql = "INSERT INTO workout_log(`date`, `user_id`, `workout_type_id`,`duration_seconds`) VALUES (NOW(), ?, ?, ?)";
+            $this->query($sql, [$user_id, $workout_type_id, $duration_secs]);
+        } elseif (is_int($date)) {
+            $sql = "INSERT INTO workout_log(`date`, `user_id`, `workout_type_id`,`duration_seconds`) VALUES (FROM_UNIXTIME(?), ?, ?, ?)";
+            $this->query($sql, [$date, $user_id, $workout_type_id, $duration_secs]);
+        } elseif (is_string($date) && !empty($date)) {
+            $sql = "INSERT INTO workout_log(`date`, `user_id`, `workout_type_id`,`duration_seconds`) VALUES (?, ?, ?, ?)";
+            $this->query($sql, [$date, $user_id, $workout_type_id, $duration_secs]);
+        }
         return;
     }
 
@@ -549,8 +594,8 @@ class DB {
         }
         return $macro_calories;
     }
-    
-    /*
+
+    /**
      * Fetch all macronutrients from the database
      * 
      * @return array an array of macronutrient IDs and Names
@@ -576,6 +621,140 @@ class DB {
         $stmt = $this->query($sql);
         $array_results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $array_results;
+    }
+    
+    /**
+     * Fetch macronutrients relevant to a specific food from the database
+     * 
+     * @param int food_id The ID of the food
+     * @return array an array of macronutrient IDs and Names
+     * @example $macros = get_food_macronutrients(1);
+     */
+    function get_food_macronutrients(int $food_id) :array {
+        $sql = <<<SQL
+        SELECT nutrient.name, amount, rdv_unit, ROUND(amount/rdv_amount*100) AS percent_dv
+        FROM macronutrient_content
+        INNER JOIN food ON food.id = food_id
+        INNER JOIN nutrient ON nutrient.id = nutrient_id
+        WHERE food.id = ?;
+        SQL;
+        $stmt = $this->query($sql, [$food_id]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $macros = [];
+        foreach($rows as $row) {
+            $macros[$row['name']] = [
+                'amount' => $row['amount'],
+                'unit' => $row['rdv_unit'],
+                'percent_dv' => $row['percent_dv']
+            ];
+        }
+        return $macros;
+    }
+
+    /**
+     * Fetch all micronutrients relevant to a specific food from the database
+     * 
+     * @param int food_id The ID of the food
+     * @return array an array of micronutrient IDs and Names
+     * @example $macros = get_food_micronutrients(1);
+     */
+    function get_food_micronutrients(int $food_id) :array {
+        $sql = <<<SQL
+        SELECT nutrient.name, (rdv_amount*percent_dv/100) AS amount, rdv_unit, percent_dv
+        FROM micronutrient_content
+        INNER JOIN food ON food.id = food_id
+        INNER JOIN nutrient ON nutrient.id = nutrient_id
+        WHERE food.id = ?;
+        SQL;
+        $stmt = $this->query($sql, [$food_id]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $micros = [];
+        foreach($rows as $row) {
+            $micros[$row['name']] = [
+                'amount' => $row['amount'],
+                'unit' => $row['rdv_unit'],
+                'percent_dv' => $row['percent_dv']
+            ];
+        }
+        return $micros;
+    }
+
+    /**
+     * Get a list of meals
+     * 
+     * The return value is in this format:
+     * 
+     * [
+     *     {
+     *         "datetime": "2021-01-08 19:04:00",
+     *         "unixtime": "1610154240",
+     *         "foods": [
+     *             {
+     *                 "name": "Chik-Fil-A Chocolate Milkshake (small)",
+     *                 "calories": "1220"
+     *             }
+     *         ]
+     *     },
+     *     {
+     *         "datetime": "2020-11-12 19:26:35",
+     *         "unixtime": "1605230795",
+     *         "foods": [
+     *             {
+     *                 "name": "large egg",
+     *                 "calories": "249"
+     *             },
+     *             {
+     *                 "name": "swiss cheese",
+     *                 "calories": "72"
+     *             },
+     *             {
+     *                 "name": "Lette Caramel Macaron",
+     *                 "calories": "90"
+     *             }
+     *         ]
+     *     },
+     * 
+     * @param int user_id The user ID
+     * @param int timestamp If you want to get a single meal
+     * @return array
+     * @example get_meals(1)
+     */
+    function get_meals(int $user_id, ?int $timestamp = null): array {
+        $times = [];
+        if(is_null($timestamp)) {
+            $times = $this->query("SELECT date AS datetime, UNIX_TIMESTAMP(date) AS unixtime FROM food_log WHERE user_id = ? GROUP BY date ORDER BY date DESC", [$user_id])->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            $times[] = ['datetime' => $this->query("SELECT FROM_UNIXTIME(?)", [$timestamp])->fetchColumn(), 'unixtime' => $timestamp];
+        }
+        $sql = <<<SQL
+        SELECT food.name, calories_per_serving*servings AS calories
+        FROM food_log
+        INNER JOIN food ON food.id = food_id
+        WHERE user_id = ? AND `date` = ?
+        SQL;
+        $sumsql = <<<SQL
+        SELECT 'Total' as name, SUM(calories_per_serving*servings) AS calories
+        FROM food_log
+        INNER JOIN food ON food.id = food_id
+        WHERE user_id = ? AND `date` = ?
+        GROUP BY user_id,date
+        SQL;
+        $stmt = $this->pdo->prepare($sql);
+        $sumstmt = $this->pdo->prepare($sumsql);
+        $meals = [];
+        foreach($times as $time) {
+            $stmt->execute([$user_id, $time['datetime']]);
+            $foods = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $sumstmt->execute([$user_id, $time['datetime']]);
+            $foods[] = $sumstmt->fetch(PDO::FETCH_ASSOC);
+            $meals[] = [
+                'datetime' => $time['datetime'],
+                'unixtime' => (int)$time['unixtime'],
+                'foods' => $foods
+            ];
+        }
+        //echo "</div></div></div><br><h1>JSON</h1><pre>" . json_encode($meals, JSON_PRETTY_PRINT) . "</pre><div>";
+        return $meals;
     }
 }
 ?>

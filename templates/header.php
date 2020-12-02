@@ -14,6 +14,13 @@ include_once '../src/library.php';
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <!-- Bootstrap: -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<?php
+if(isset($stylesheets)) {
+    foreach ($stylesheets as $stylesheet) {
+        echo "    <link rel=\"stylesheet\" href=\"$stylesheet\">";
+    }
+}
+?>
     <style>
 html {
     position: relative;
@@ -50,6 +57,12 @@ body {
                             <a class="nav-link<?php if(strpos($_SERVER['REQUEST_URI'], "/index.php") !== false) echo " active" ?>" title="Home" alt="Home" href="index.php">Home</a>
                         </li>
                         <?php if(is_authenticated()): ?>
+                        <li class="nav-item">
+                            <a class="nav-link<?php if(strpos($_SERVER['REQUEST_URI'], "/foods.php") !== false) echo " current" ?>" title="Foods" alt="Foods" href="foods.php">Foods</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link<?php if(strpos($_SERVER['REQUEST_URI'], "/workouts.php") !== false) echo " current" ?>" title="Workouts" alt="Workouts" href="workouts.php">Workouts</a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link<?php if(strpos($_SERVER['REQUEST_URI'], "/myaccount.php") !== false) echo " current" ?>" title="My account" alt="My account" href="account.php">My account</a>
                         </li>

@@ -23,7 +23,8 @@
  * @example draw_table($rows, ['status' => 'Enrollment Status', 'name' => 'Student Name']) // prints table in the order of the associative array keys, and with pretty names matching the associative array values
  */
 function draw_table(array &$rows, ?array $headers = NULL) {
-    echo "        <table border=1 colspan=1>\n";
+    echo "    <table border=1 colspan=1 class=\"table-striped\">\n";
+    echo "        <thead>\n";
     echo "            <tr>\n                ";
     if (is_null($headers)) {
         // If the headers parameter was not specified, use database column names as table headers
@@ -44,6 +45,8 @@ function draw_table(array &$rows, ?array $headers = NULL) {
             echo "<th>$value</th>";
         }
         echo "\n            </tr>\n";
+        echo "\n        </thead>\n";
+        echo "\n        <tbody>\n";
         foreach ($rows as $row) {
             echo "            <tr>\n                ";
             foreach (array_keys($headers) as $key) {
@@ -51,10 +54,12 @@ function draw_table(array &$rows, ?array $headers = NULL) {
             }
             echo "\n            </tr>\n";
         }
-        echo "        </table>\n";
+        echo "        </tbody>\n";
+        echo "     </table>\n";
         return;
     }
     echo "\n            </tr>\n";
+    echo "\n         </thead>\n";
     foreach ($rows as $row) {
         echo "            <tr>\n                ";
         foreach ($row as $td) {
@@ -62,7 +67,8 @@ function draw_table(array &$rows, ?array $headers = NULL) {
         }
         echo "\n            </tr>\n";
     }
-    echo "        </table>\n";
+    echo "        </tbody>\n";
+    echo "     </table>\n";
 }
 
 /**
@@ -70,11 +76,41 @@ function draw_table(array &$rows, ?array $headers = NULL) {
  * 
  * This function looks at the $_SESSION variables to see if the visitor is authenticated or not.
  * 
+ * @author @zgjs
  * @return bool
  * @see "Project issue #23"
  */
 function is_authenticated(): bool {
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
     return isset($_SESSION['auth_status']) && $_SESSION['auth_status'];
 }
 
+/**
+ * Redirect to some other page
+ * 
+ * @author @zgjs
+ * @param page The page to redirect to
+ * @param message The message to display if the client has redirects disabled
+ * @return void
+ * @example redirect("login.php", "You must be signed in.");
+ */
+function redirect(string $page, string $message) {
+    $home = (isset($_SERVER['HTTPS']) ? 'https://' : 'http://') . $_SERVER['SERVER_NAME'] . dirname($_SERVER['REQUEST_URI']);
+    header("Location: $home/$page", true, 303);
+    die ("<html><body>$message <a href=\"$page\">Click here if your are not redirected automatically.</a></body></html>\n");
+}
+
+/**
+ * Require a user to be signed in to access this page
+ * 
+ * @author @zgjs
+ * @return void
+ */
+function require_signed_in() {
+    if(!is_authenticated()) {
+        redirect("login.php", "You must be signed in.");
+    }
+}
 ?>

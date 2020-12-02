@@ -47,7 +47,6 @@ if(isset($_GET['action'])):
          * Sort order of a table
          * 
          * This function takes a sort variable and returns the url of the sort type.
-         * 
          * @return url
          * Appends to the end of the url.
          */

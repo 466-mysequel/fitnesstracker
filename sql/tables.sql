@@ -1,6 +1,6 @@
 # Cleanup:
 \! echo "Dropping tables and views if they exist..."
-DROP VIEW IF EXISTS macro_totals_monthly, macro_totals_weekly, macro_totals_today, net_calories_per_day, calories_in_per_day, calories_out_per_day, current_weight, workout_calories_burned, total_food_logs;
+DROP VIEW IF EXISTS micro_totals_today, micro_totals_weekly, micro_totals_monthly, micronutrients, macronutrients, macro_totals_monthly, macro_totals_weekly, macro_totals_today, net_calories_per_day, calories_in_per_day, calories_out_per_day, current_weight, workout_calories_burned, total_food_logs;
 DROP FUNCTION IF EXISTS WEIGHT_AT_TIME;
 DROP TABLE IF EXISTS food_log,workout_log,weight_log,macronutrient_content,micronutrient_content,food,nutrient,workout_type,user;
 # Entities: 
@@ -89,3 +89,19 @@ CREATE TABLE food_log (
     FOREIGN KEY (food_id) REFERENCES food(id)
 );
 \! echo " * food_log"
+CREATE VIEW total_food_logs AS
+SELECT user_id,food_id,nutrient_id,servings,date FROM food_log		select t.user_id,
+INNER JOIN macronutrient_content USING (food_id)		       f.name as 'Food',
+GROUP BY user_id,food_id ORDER BY date ASC;		       t.servings as 'servings',
+       SUM(CASE WHEN n.id = 1 THEN mi.amount * t.servings ELSE '0' END) as 'fat',
+       SUM(CASE WHEN n.id = 4 THEN mi.amount * t.servings ELSE '0' END) as 'carbs',
+       SUM(CASE WHEN n.id = 7 THEN mi.amount * t.servings ELSE '0' END) as 'protein',
+       SUM(CASE WHEN n.id = 6 THEN mi.amount * t.servings ELSE '0' END) as 'fiber',
+       t.date as 'Date'
+from  food_log t 
+JOIN macronutrient_content mi ON mi.food_id = t.food_id
+JOIN user u ON u.id = t.user_id 
+JOIN food f ON f.id = t.food_id 
+JOIN nutrient n ON n.id = mi.nutrient_id
+group by t.user_id,t.food_id;
+\! echo " * total_food_logs"
