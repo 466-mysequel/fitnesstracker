@@ -13,8 +13,6 @@ $page_title = "Fitness Tracker &rsaquo; Foods";
 $result=NULL;
 $stylesheets = ['css/nutrition-facts.css'];
 $style = <<<CSS
-  css declarations;
-}
 .food {
     float: left; margin: 5px;
 }
