@@ -73,7 +73,7 @@ if(isset($_GET['action'])):
             ){
                 $food = $db->get_food((int)$foods[$key]);
                 $conv_unit[$key] = convert::volume_to_cc((float)$servings[$key],$value);
-                $serving[] = $conv_unit[$key] / $food['serving_size_grams'];
+                $serving[] = $conv_unit[$key] / $food['serving_size_cc'];
             } else {
                 continue;
             }
