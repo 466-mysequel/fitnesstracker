@@ -501,24 +501,28 @@ class DB {
      * @author @z1868762 @HR0102 @zgjs
      * @param user_id The user's ID
      * @param workout_type_id The id of the workout_type
-     * @param duration_secs The duration of the workout
+     * @param duration_seconds The duration of the workout
      * @param int|string date either the unix timestamp, a string in the format YYYY-MM-DD hh:mm:ss, or null to use the current time
-     * @return void
+     * @return int
      * @example log_workout(1,1,1)
      * @see "Project issue #27"
      */
-    function log_workout(int $user_id, int $workout_type_id, int $duration_sec, $date = null) {
+    function log_workout(int $user_id, int $workout_type_id, int $duration_seconds, $date = null): int {
         if(is_null($date)) {
             $sql = "INSERT INTO workout_log(`date`, `user_id`, `workout_type_id`,`duration_seconds`) VALUES (NOW(), ?, ?, ?)";
-            $this->query($sql, [$user_id, $workout_type_id, $duration_secs]);
+            $stmt = $this->query($sql, [$user_id, $workout_type_id, $duration_secs]);
         } elseif (is_int($date)) {
             $sql = "INSERT INTO workout_log(`date`, `user_id`, `workout_type_id`,`duration_seconds`) VALUES (FROM_UNIXTIME(?), ?, ?, ?)";
-            $this->query($sql, [$date, $user_id, $workout_type_id, $duration_secs]);
+            $stmt = $this->query($sql, [$date, $user_id, $workout_type_id, $duration_secs]);
         } elseif (is_string($date) && !empty($date)) {
             $sql = "INSERT INTO workout_log(`date`, `user_id`, `workout_type_id`,`duration_seconds`) VALUES (?, ?, ?, ?)";
-            $this->query($sql, [$date, $user_id, $workout_type_id, $duration_secs]);
+            $stmt = $this->query($sql, [$date, $user_id, $workout_type_id, $duration_seconds]);
         }
-        return;
+        if($stmt->rowCount() > 0) {
+            return (int) $this->query("SELECT UNIX_TIMESTAMP(?)", [$date])->fetchColumn();
+        }
+        var_dump($this->pdo->errorInfo());
+        return -1;
     }
 
     /**
