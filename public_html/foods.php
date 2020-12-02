@@ -5,9 +5,24 @@ ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
 include_once '../src/db.php';
 $db = new DB();
-include_once '../src/library.php'; 
+include_once '../src/library.php';
+include_once '../src/convert.php';
+require_signed_in();
+
 $page_title = "Fitness Tracker &rsaquo; Foods";
 $result=NULL;
+$stylesheets = ['css/nutrition-facts.css'];
+$style = <<<CSS
+.food {
+    float: left; margin: 5px;
+}
+.solid {
+    width:108px; height:108px; background:url(img/fooddrink.png) 0px 0px;
+}
+.liquid {
+    width:108px; height:108px; background:url(img/fooddrink.png) -108px 0px;
+}
+CSS;
 include_once '../templates/header.php';
 ?>
     <!-- Page Content -->
@@ -29,18 +44,64 @@ include_once '../templates/header.php';
 <?php
 if(isset($_GET['action'])):
     switch($_GET['action']):
-        case 'log': ?>
+        case 'log':
 
-<?php if(isset($_SESSION['user_id']) && isset($_POST['food_id']) && isset($_POST['servings'])) {
-    $result = $db->log_food($_SESSION['user_id'],$_POST['food_id'],$_POST['servings']);
-} ?>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    if(isset($_GET['action']) && $_GET['action'] == 'log' && isset($_POST['food_id']) && isset($_POST['servings']) && isset($_POST['unit'])) {
+        $servings = $_POST['servings'];
+        $foods = $_POST['food_id'];
+        $conv_unit = []; // used to store conversion unit
+        $serving = []; // used to store serving after serving has been calculated using
+
+        // check food entries and convert entries as needed
+        foreach($_POST['unit'] as $key => $value){ 
+            if($value == "serving"){
+                $serving[] = $servings[$key];
+            } elseif ($value == "g" || $value == "lb"  || $value == "oz" || $value == "kg"){
+                $food = $db->get_food((int)$foods[$key]);
+                $conv_unit[$key] = convert::mass_to_g((float)$servings[$key],$value);
+                $serving[] = $conv_unit[$key] / $food['serving_size_grams'];
+            } elseif(
+                $value == "mL"    ||
+                $value == "L"     ||
+                $value == "gal"   ||
+                $value == "qt"    ||
+                $value == "pt"    ||
+                $value == "cup"   ||
+                $value == "fl oz" ||
+                $value == "tbsp"  ||
+                $value == "tsp"
+            ){
+                $food = $db->get_food((int)$foods[$key]);
+                $conv_unit[$key] = convert::volume_to_cc((float)$servings[$key],$value);
+                $serving[] = $conv_unit[$key] / $food['serving_size_cc'];
+            } else {
+                continue;
+            }
+        }
+        
+        $log_food_timestamp = $db->log_food($_SESSION['user_id'], $_POST['food_id'], (array)$serving, $_POST['date'] . ' ' . $_POST['time']);
+        if($log_food_timestamp > 0) {
+            redirect("foods.php?action=history&timestamp=" . $log_food_timestamp, "Your food was logged successfully");
+        }
+    }
+?>
         <form method="POST">
-            <h3>Keep track of your meals</h3>
+            <h3 class="mt-3">Log a meal</h3>
+            <p class="lead"><?php echo (isset($log_food_timestamp)  ? "There was a problem logging your meal." : "Please enter the information about your meal, including one or more foods."); ?></p>
             <div class="form-row">
-                <div class="form-group col-md-10">
-                    <label for="mealtime" class="col-form-label"><h4>Date and time</h4></label>
-                    <input class="form-control" type="datetime-local" value="" id="mealtime" name="date">
+                <div class="form-group col-md-10 form-inline">
+                    <div class="input-group mb-3 input-group-lg">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="date">Date:</span>
+                        </div>
+                        <input class="form-control" type="date" id="date" name="date">
+                    </div>
+                    <div class="input-group mb-3 input-group-lg">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="date">Time</span>
+                        </div>
+                        <input class="form-control" type="time" id="time" name="time">
+                    </div>
                 </div>
                 <div class="form-group col-md-10">
                     <div class="foods">
@@ -57,16 +118,260 @@ if(isset($_GET['action'])):
             </div>
         </form>
 <?php   break;
-        case 'history': ?>
-        <h2>Your meal history</h2>
-        <div class="row">
+        case 'history':
+            if(isset($_GET['timestamp'])):
+                echo "        <h3 class=\"mt-3\"><a href=\"?action=history\">Your meal history</a> &rsaquo; Your meal on " . date('h:i:s A l, jS \of F Y', (int)$_GET['timestamp']) . "</h3>\n";
+                $meals = $db->get_meals((int)$_SESSION['user_id'], (int)$_GET['timestamp']);
+                foreach($meals as $meal):
+                    draw_table($meal['foods'], ['name' => 'Food', 'calories' => 'Calories']);
+                endforeach;
+            else:
+                echo "        <h3 class=\"mt-3\">Your meal history</h2>\n";
+                $meals = $db->get_meals((int)$_SESSION['user_id']);
+                foreach($meals as $meal):
+                    echo "\n            <h5 class=\"mt-3\"><a href=\"?action=history&timestamp=" . $meal['unixtime'] . "\">". date('h:i:s A l, jS \of F Y', $meal['unixtime']) . "</a></h3>\n";
+                    draw_table($meal['foods'], ['name' => 'Food', 'calories' => 'Calories']);
+                endforeach;
+            endif;
+        break;
+        case 'browse':
+            if(isset($_GET['id'])):
+                $food = $db->get_food((int) $_GET['id']);
+                $macros = $db->get_food_macronutrients((int) $_GET['id']);
+                $micros = $db->get_food_micronutrients((int) $_GET['id']);
+?>
+        <h1>Foods &rsaquo; <?php echo $food['name']; ?> &rsaquo; Details</h1>
+        <div><h3><div class="<?php echo $food['type']; ?> food"></div></h2></div>
+        <div>
+            <!-- HTML/CSS originally based on snippet from https://codemyui.com/nutrition-facts-table-using-html-css/ and modified to suit our needs -->
+            <section class="nutrition-facts">
+            <header class="nutrition-facts-header">
+                <h1 class="nutrition-facts-title">Nutrition Facts</h1>
+                <p>Serving Size <?php echo $food['serving_size_friendly']; ?> (about <?php echo $food['serving_size_grams']; ?>g)</p>
+            </header>
+            <table class="nutrition-facts-table">
+                <thead>
+                    <tr>
+                        <th colspan="3" class="small-info">Amount Per Serving</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th colspan="2">
+                            <b>Calories</b> 
+                            <?php echo $food['calories_per_serving']; ?>
+                        </th>
+                        <td>
+                            Calories from Fat
+                            <?php echo (isset($macros['Fat']) ? (int)$macros['Fat']['amount'] * 4 : 0 ); ?>
+                        </td>
+                    </tr>
+                    <tr class="thick-row">
+                        <td colspan="3" class="small-info">
+                        <b>% Daily Value*</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">
+                            <b>Total Fat</b>
+                            <?php echo (isset($macros['Fat']) ? $macros['Fat']['amount'] : 0 ); ?>g
+                        </th>
+                        <td>
+                            <b><?php echo (isset($macros['Fat']) ? $macros['Fat']['percent_dv'] : 0 ); ?>%</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="blank-cell">
+                        </td>
+                        <th>
+                            Saturated Fat
+                            <?php echo (isset($macros['Saturated fat']) ? $macros['Saturated fat']['amount'] : 0 ); ?>g
+                        </th>
+                        <td>
+                            <b><?php echo (isset($macros['Saturated fat']) ? $macros['Saturated fat']['percent_dv'] : 0 ); ?>%</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="blank-cell">
+                        </td>
+                        <th>
+                            Trans Fat
+                            <?php echo (isset($macros['Trans fat']) ? $macros['Trans fat']['amount'] : 0 ); ?>g
+                        </th>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">
+                            <b>Cholesterol</b>
+                            <?php echo (isset($macros['Cholesterol']) ? $macros['Cholesterol']['amount'] : 0 ); ?>mg
+                        </th>
+                        <td>
+                            <b><?php echo (isset($macros['Cholesterol']) ? $macros['Cholesterol']['percent_dv'] : 0 ); ?>%</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">
+                            <b>Sodium</b>
+                            <?php echo (isset($macros['Sodium']) ? $macros['Sodium']['amount'] : 0 ); ?>mg
+                        </th>
+                        <td>
+                            <b><?php echo (isset($macros['Sodium']) ? $macros['Sodium']['percent_dv'] : 0 ); ?>%</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">
+                            <b>Total Carbohydrate</b>
+                            <?php echo (isset($macros['Total carbohydrates']) ? $macros['Total carbohydrates']['amount'] : 0 ); ?>g
+                        </th>
+                        <td>
+                            <b><?php echo (isset($macros['Total carbohydrates']) ? $macros['Total carbohydrates']['percent_dv'] : 0 ); ?>%</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="blank-cell">
+                        </td>
+                        <th>
+                            Dietary Fiber
+                            <?php echo (isset($macros['Dietary fiber']) ? $macros['Dietary fiber']['amount'] : 0 ); ?>g
+                        </th>
+                        <td>
+                            <b><?php echo (isset($macros['Dietary fiber']) ? $macros['Dietary fiber']['percent_dv'] : 0 ); ?>%</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="blank-cell">
+                        </td>
+                        <th>
+                            Added sugars
+                            <?php echo (isset($macros['Added sugars']) ? $macros['Added sugars']['amount'] : 0 ); ?>g
+                        </th>
+                        <td>
+                        </td>
+                    </tr>
+                    <tr class="thick-end">
+                        <th colspan="2">
+                            <b>Protein</b>
+                            <?php echo (isset($macros['Protein']) ? $macros['Protein']['amount'] : 0 ); ?>g
+                        </th>
+                        <td>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="nutrition-facts-table--grid">
+                <tbody>
+                <tr>
+                    <td colspan="2">
+                    Vitamin A
+                    <?php echo (isset($micros['Vitamin A']) ? $micros['Vitamin A']['percent_dv'] : 0 ); ?>%
+                    </td>
+                    <td>
+                    Vitamin C
+                    <?php echo (isset($micros['Vitamin C']) ? $micros['Vitamin C']['percent_dv'] : 0 ); ?>%
+                    </td>
+                </tr>
+                <tr class="thin-end">
+                    <td colspan="2">
+                    Calcium
+                    <?php echo (isset($micros['Calcium']) ? $micros['Calcium']['percent_dv'] : 0 ); ?>%
+                    </td>
+                    <td>
+                    Iron
+                    <?php echo (isset($micros['Iron']) ? $micros['Iron']['percent_dv'] : 0 ); ?>%
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <p class="small-info">* Percent Daily Values are based on a 2,000 calorie diet. Your daily values may be higher or lower depending on your calorie needs:</p>
+
+            <table class="nutrition-facts-table--small small-info">
+                <thead>
+                <tr>
+                    <td colspan="2"></td>
+                    <th>Calories:</th>
+                    <th>2,000</th>
+                    <th>2,500</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th colspan="2">Total Fat</th>
+                    <td>Less than</td>
+                    <td>65g</td>
+                    <td>80g</td>
+                </tr>
+                <tr>
+                    <td class="blank-cell"></td>
+                    <th>Saturated Fat</th>
+                    <td>Less than</td>
+                    <td>20g</td>
+                    <td>25g</td>
+                </tr>
+                <tr>
+                    <th colspan="2">Cholesterol</th>
+                    <td>Less than</td>
+                    <td>300mg</td>
+                    <td>300 mg</td>
+                </tr>
+                <tr>
+                    <th colspan="2">Sodium</th>
+                    <td>Less than</td>
+                    <td>2,400mg</td>
+                    <td>2,400mg</td>
+                </tr>
+                <tr>
+                    <th colspan="3">Total Carbohydrate</th>
+                    <td>300g</td>
+                    <td>375g</td>
+                </tr>
+                <tr>
+                    <td class="blank-cell"></td>
+                    <th colspan="2">Dietary Fiber</th>
+                    <td>25g</td>
+                    <td>30g</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <p class="small-info">
+                Calories per gram:
+            </p>
+            <p class="small-info text-center">
+                Fat 9
+                &bull;
+                Carbohydrate 4
+                &bull;
+                Protein 4
+            </p>
+
+            </section>
         </div>
-<?php   break;
-        case 'browse': ?>
-        <?php if(isset($_GET['id'])): ?>
-            <h2>Meal <?php echo $_GET['id'] ?></h2>
         <?php else: ?>
-            <h2>Directory of foods</h2>
+            <h1>Directory of foods</h2>
+            <div class="row">
+                <div class="col-4">
+                    <h3>Foods</h3>
+                    <ul>
+            <?php $foods = $db->query("SELECT id,name FROM food WHERE type = 'solid'")->fetchAll(PDO::FETCH_ASSOC); foreach ($foods as $food): ?>
+                <li>
+                    <a href="?action=browse&id=<?php echo $food['id']; ?>"><?php echo $food['name']; ?></a>
+                </li>
+            <?php endforeach; ?>
+                    </ul>
+                </div>
+                <div class="col-4">
+                    <h3>Beverages</h3>
+                    <ul>
+            <?php $foods = $db->query("SELECT id,name FROM food WHERE type = 'liquid'")->fetchAll(PDO::FETCH_ASSOC); foreach ($foods as $food): ?>
+                <li>
+                    <a href="?action=browse&id=<?php echo $food['id']; ?>"><?php echo $food['name']; ?></a>
+                </li>
+            <?php endforeach; ?>
+                    </ul>
+                </div>
+            </div>
         <?php endif; ?>
         <div class="row">
         </div>
@@ -94,11 +399,11 @@ if(isset($_GET['action'])):
             <label for="serving_size_friendly" >Serving Size</label>
             <input type="text" id="serving_size_friendly" name="serving_size_friendly" class="form-control" placeholder="i.e., 1 egg">
             <label for="calories" >Calories Per Serving</label>
-            <input type="number" min="0" id="calories" name="calories_per_serving" class="form-control" placeholder="100">
+            <input type="number" step="0.01"min="0.01" id="calories" name="calories_per_serving" class="form-control" placeholder="100">
             <label for="serving_size_grams" >Serving Size (g)</label>
-            <input type="number" min="0" id="serving_size_grams" name="serving_size_grams" class="form-control" placeholder="50">
+            <input type="number" step="0.01"min="0.01" id="serving_size_grams" name="serving_size_grams" class="form-control" placeholder="50">
             <label for="serving_size_cc" >Serving Size (cc)</label>
-            <input type="number" min="0" id="serving_size_cc" name="serving_size_cc" class="form-control" placeholder="optional">
+            <input type="number" step="0.01"min="0.01" id="serving_size_cc" name="serving_size_cc" class="form-control" placeholder="optional">
         </div>
         <div class="col">    
             <div class="macros">
@@ -135,7 +440,7 @@ if(isset($_GET['action'])):
                     <label for="nutrient_name">Name</label>
                     <input type="text" id="nutrient_name" name="name" class="form-control">
                     <label for="rdv_amount">Recommended Daily Value</label>
-                    <input type="number" min="0" id="rdv_amount" name="rdv_amount" class="form-control" placeholder="0">
+                    <input type="number" step="0.01"min="0.01" id="rdv_amount" name="rdv_amount" class="form-control" placeholder="0">
                     <label for="rdv_unit">Unit</label>
                     <select id="rdv_unit" name="rdv_unit" class="form-control">
                         <option value="g">g</option>
@@ -253,7 +558,7 @@ if(isset($_GET['action'])):
                 }
 
                 // add the rest to macro_html to close it up
-                macro_html = macro_html.concat(`</select><input type="number" min="0" name="macro_g[]" style="width:3em"/>grams <a href="#" class="delete-macro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
+                macro_html = macro_html.concat(`</select><input type="number" step="0.01" min="0.01" name="macro_g[]" style="width:5em"/>grams <a href="#" class="delete-macro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
                 $(macro_wrapper).append(macro_html); //add input box
                 num_macros++; // add to macro counter
             } else {
@@ -277,7 +582,7 @@ if(isset($_GET['action'])):
                 for(var i = 0; i < micro_option_ids.length; i++){
                     micro_html = micro_html.concat(`<option value=${micro_option_ids[i]}>${micro_option_names[i]}</option>`);
                 }   
-                micro_html = micro_html.concat(`</select><input type="number" min="0" name="micro_dv[]" style="width:3em"/>% <a href="#" class="delete-micro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
+                micro_html = micro_html.concat(`</select><input type="number" step="0.01"min="0.01" name="micro_dv[]" style="width:5em"/>% <a href="#" class="delete-micro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
                 $(micro_wrapper).append(micro_html); //add input box
                 num_micros++;
             } else {
@@ -300,7 +605,31 @@ if(isset($_GET['action'])):
                 for(var i = 0; i < food_option_ids.length; i++){
                     food_html = food_html.concat(`<option value=${food_option_ids[i]}>${food_option_names[i]}</option>`);
                 }   
-                food_html = food_html.concat(`</select><input type="number" min="1" name="servings[]" style="width:3em"/> Serving(s) <a href="#" class="delete-food"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
+                food_html = food_html.concat(`</select>
+                                                <label for="servings">Amount</label>
+                                                <input id="servings" type="number" step="0.01" min="0.01" name="servings[]" style="width:5em"/>
+                                                <label for="unit">Unit</label>
+                                                <select name="unit[]" id="unit">
+                                                    <option value="serving">serving</option>
+                                                    <option value="L">L</option>
+                                                    <option value="mL">mL</option>
+                                                    <option value="gal">gal</option>
+                                                    <option value="qt">qt</option>
+                                                    <option value="pt">pt</option>
+                                                    <option value="cup">cup</option>
+                                                    <option value="g">g</option>
+                                                    <option value="kg">kg</option>
+                                                    <option value="lb">lb</option>
+                                                    <option value="tsp">tsp</option>
+                                                    <option value="oz">oz</option>
+                                                    <option value="fl oz">fl oz</option>
+                                                    <option value="tbsp">tbsp</option>
+                                                    <option value="tsp">tsp</option>
+                                                </select> 
+                                                <a href="#" class="delete-food">
+                                                <span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a>
+                                                </div>`);
+                
                 $(food_wrapper).append(food_html); //add input box
                 num_foods++;
             } else {

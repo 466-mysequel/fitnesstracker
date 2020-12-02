@@ -1,0 +1,109 @@
+@charset "UTF-8";
+/* compiled from Sass CSS that was originally from https://codemyui.com/nutrition-facts-table-using-html-css/ and modified by @zgjs to fit our needs */
+.nutrition-facts {
+  line-height: 1.4;
+  font-size: small;
+  border: 1px solid black;
+  margin: 20px;
+  float: left;
+  width: 290px;
+  padding: 0.5rem;
+}
+.nutrition-facts table {
+  border-collapse: collapse;
+}
+.nutrition-facts p {
+  margin: 0;
+}
+
+.nutrition-facts-title {
+  font-weight: bold;
+  font-size: 2rem;
+  margin: 0 0 0.25rem 0;
+}
+
+.nutrition-facts-header {
+  border-bottom: 10px solid black;
+  padding: 0 0 0.25rem 0;
+  margin: 0 0 0.5rem 0;
+}
+.nutrition-facts-header p {
+  margin: 0;
+}
+
+.nutrition-facts-table, .nutrition-facts-table--grid, .nutrition-facts-table--small {
+  width: 100%;
+}
+.nutrition-facts-table thead tr th, .nutrition-facts-table--grid thead tr th, .nutrition-facts-table--small thead tr th,
+.nutrition-facts-table thead tr td,
+.nutrition-facts-table--grid thead tr td,
+.nutrition-facts-table--small thead tr td {
+  border: 0;
+}
+.nutrition-facts-table th, .nutrition-facts-table--grid th, .nutrition-facts-table--small th,
+.nutrition-facts-table td,
+.nutrition-facts-table--grid td,
+.nutrition-facts-table--small td {
+  font-weight: normal;
+  text-align: left;
+  padding: 0.25rem 0;
+  border-top: 1px solid black;
+  white-space: nowrap;
+}
+.nutrition-facts-table td:last-child, .nutrition-facts-table--grid td:last-child, .nutrition-facts-table--small td:last-child {
+  text-align: right;
+}
+.nutrition-facts-table .blank-cell, .nutrition-facts-table--grid .blank-cell, .nutrition-facts-table--small .blank-cell {
+  width: 1rem;
+  border-top: 0;
+}
+.nutrition-facts-table .thick-row th, .nutrition-facts-table--grid .thick-row th, .nutrition-facts-table--small .thick-row th,
+.nutrition-facts-table .thick-row td,
+.nutrition-facts-table--grid .thick-row td,
+.nutrition-facts-table--small .thick-row td {
+  border-top-width: 5px;
+}
+
+.small-info {
+  font-size: 0.7rem;
+}
+
+.nutrition-facts-table--small {
+  border-bottom: 1px solid #999;
+  margin: 0 0 0.5rem 0;
+}
+.nutrition-facts-table--small thead tr {
+  border-bottom: 1px solid black;
+}
+.nutrition-facts-table--small td:last-child {
+  text-align: left;
+}
+.nutrition-facts-table--small th,
+.nutrition-facts-table--small td {
+  border: 0;
+  padding: 0;
+}
+
+.nutrition-facts-table--grid {
+  margin: 0 0 0.5rem 0;
+}
+.nutrition-facts-table--grid td:last-child {
+  text-align: left;
+}
+.nutrition-facts-table--grid td:last-child::before {
+  content: "•";
+  font-weight: bold;
+  margin: 0 0.25rem 0 0;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.thick-end {
+  border-bottom: 10px solid black;
+}
+
+.thin-end {
+  border-bottom: 1px solid black;
+}
