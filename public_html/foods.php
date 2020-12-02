@@ -17,6 +17,8 @@ $page_title = "Fitness Tracker &rsaquo; Foods";
 $result=NULL;
 $stylesheets = ['css/nutrition-facts.css'];
 $style = <<<CSS
+  css declarations;
+}
 .food {
     float: left; margin: 5px;
 }
@@ -91,7 +93,7 @@ if(isset($_GET['action'])):
                     draw_table($meal['foods'], ['name' => 'Food', 'calories' => 'Calories']);
                 endforeach;
             else:
-                echo "        <h3 class=\"mt-3\">Your meal history</h2>\n";
+                echo "        <h3 class=\"mt-3\">Your logged meals</h3>\n";
                 $meals = $db->get_meals((int)$_SESSION['user_id']);
                 foreach($meals as $meal):
                     echo "\n            <h5 class=\"mt-3\"><a href=\"?action=history&timestamp=" . $meal['unixtime'] . "\">". date('h:i:s A l, jS \of F Y', $meal['unixtime']) . "</a></h3>\n";
@@ -447,18 +449,138 @@ if(isset($_GET['action'])):
         </div>
 <?php   break;
         endswitch; ?>
-<?php else: ?>
+<?php else: 
+        $summaryperiod = (isset($_GET['summaryperiod']) ? $_GET['summaryperiod'] : "monthly" );
+        $start_date = '';
+        $stop_date = '';
+        if(isset($_GET['start_date']) && isset($_GET['stop_date']) && preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/", $_GET['start_date']) && preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/", $_GET['stop_date'])) {
+            $start_date = $_GET['start_date'];
+            $stop_date = $_GET['stop_date'];
+        } else {
+            switch($summaryperiod) {
+                case 'today':
+                    $start_date = date('Y-m-d');
+                    $stop_date = date('Y-m-d');
+                break;
+                case 'weekly':
+                    $start_date = date('Y-m-d', strtotime('7 days ago'));
+                    $stop_date = date('Y-m-d');
+                break;
+                case 'monthly':
+                default:
+                    $summaryperiod = 'monthly';
+                    $start_date = date('Y-m-d', strtotime('30 days ago'));
+                    $stop_date = date('Y-m-d');
+                break;
+            }
+        }    
+?>
+        <h2 class="mt-3">Your meals summary</h2>
         <div class="row">
             <div class="col-6">
-                <div style="text-align:center;line-height:4em;width:100%;height:8em;margin:12px 12px 12px 12px;font-size:2em;background-color:#666666">Your most recent meal</div>
+                <h4>Macro percents</h4>
+                <div id="piechart"></div>
+                <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+                <script type="text/javascript">
+// Load google charts
+google.charts.load('current', {'packages':['corechart']});
+google.charts.setOnLoadCallback(drawChart);
 
+// Draw the chart and set the chart values
+function drawChart() {
+  var data = google.visualization.arrayToDataTable(<?php
+                $macro_calories_period = 'monthly';
+                if(in_array($summaryperiod, ['today', 'weekly']))
+                    $macro_calories_period = $summaryperiod;
+                $macro_calories = $db->get_macro_calories($_SESSION['user_id'],$macro_calories_period);
+                echo json_encode($macro_calories);
+?>);
+
+  // Optional; add a title and set the width and height of the chart
+  var options = {'title':'Macros calories percents (<?php echo $macro_calories_period ?>)', 'width':500, 'height':300};
+
+  // Display the chart inside the <div> element with id="piechart"
+  var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+  chart.draw(data, options);
+}
+                </script>
+
+                <pre>
+                </pre>
             </div>
             <div class="col-6">
-                <h2>Lorem ipsum dolar sil imet</h2>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                <h4>Net calories per day</h4>
+<?php
+        $net_cals = $db->query("SELECT * FROM net_calories_per_day WHERE user_id = ? ORDER BY date DESC LIMIT 10", [$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);
+        $headers = [
+            'date' => 'Date',
+            'total_calories_in' => 'Cals In',
+            'total_calories_out' => 'Cals Out',
+            'net_calories' => 'Net Cals'
+        ];
+        draw_table($net_cals, $headers, true, 'netCals', 'table table-striped table-sm');
+?>
+            </div>
+            <div class="col-4">
             </div>
         </div>
-        </div>
+<?php
+            switch($summaryperiod) {
+                case 'monthly':
+                    echo "            <h4>Meals totals (monthly) <a href=\"?summaryperiod=weekly\">weekly</a> <a href=\"?summaryperiod=today\">today</a></h4>";
+                break;
+                
+                case 'weekly':
+                    echo "            <h4>Meals totals <a href=\"?summaryperiod=monthly\">monthly</a> (weekly) <a href=\"?summaryperiod=today\">today</a></h4>";
+                break;
+                    echo "            <h4>Meals totals <a href=\"?summaryperiod=monthly\">monthly</a> (weekly) <a href=\"?summaryperiod=today\">today</a></h4>";
+                
+                case 'today':
+                    echo "            <h4>Meals totals <a href=\"?summaryperiod=monthly\">monthly</a> <a href=\"?summaryperiod=weekly\">weekly</a> (today)</h4>";
+                break;
+
+                case 'range':
+                    echo "            <h4>Meals totals <a href=\"?summaryperiod=monthly\">monthly</a> <a href=\"?summaryperiod=weekly\">weekly</a> <a href=\"?summaryperiod=today\">today</a></h4>";
+                break;
+                
+            }
+            $rows = $db->get_food_totals($_SESSION['user_id'], $start_date, $stop_date);
+            $headers = [
+                'food' => 'Food name',
+                'meals' => 'Total Meals',
+                'servings' => 'Total Servings',
+                'calories_per_serving' => 'Cals / Serving',
+                'calories' => 'Total Cals',
+                'fat' => 'Total Fat',
+                'carbs' => 'Total Carbs',
+                'protein' => 'Total Protein',
+                'fiber' => 'Total Fiber',
+            ];
+            draw_table($rows, $headers, true, 'foods-summary', 'table table-striped table-sm sortable');
+?>
+        <script src="https://www.w3schools.com/lib/w3.js"></script>
+        <form method="GET">
+            <div class="form-row form-inline">
+                <div class="input-group mb-3 input-group-sm">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="start_date">Start date:</span>
+                    </div>
+                    <input class="form-control" type="date" id="start_date" name="start_date">
+                </div>
+                <div class="input-group mb-3 input-group-sm">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="stop_date">End date:</span>
+                    </div>
+                    <input class="form-control" type="date" id="stop_date" name="stop_date">
+                </div>
+                <div class="input-group mb-3 input-group-sm">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="summaryperiod">Period</span>
+                    </div>
+                    <input type="submit" class="btn-sm" id="summaryperiod" name="summaryperiod" value="range">
+                </div>
+            </div>
+        </form>
 
 <?php endif; ?>
     </main>
