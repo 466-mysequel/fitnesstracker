@@ -133,9 +133,7 @@ if(isset($_GET['action'])):
                     draw_table($meal['foods'], ['name' => 'Food', 'calories' => 'Calories']);
                 endforeach;
             endif;
-        break;
-?>
-<?php
+
         /**
          * Sort order of a table
          * 
