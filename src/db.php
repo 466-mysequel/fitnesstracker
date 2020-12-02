@@ -760,7 +760,6 @@ class DB {
         //echo "</div></div></div><br><h1>JSON</h1><pre>" . json_encode($meals, JSON_PRETTY_PRINT) . "</pre><div>";
         return $meals;
     }
-    
 
     /**
      * Get a list of workouts
@@ -783,8 +782,8 @@ class DB {
             return $this->query("$sql AND `date` = FROM_UNIXTIME(?)", [$user_id, $timestamp])->fetchAll(PDO::FETCH_ASSOC);
         }
     }
-}
 
+    /**
      * To get latest workout from the workout_log tables
      * 
      * @author @HR0102
@@ -823,4 +822,5 @@ class DB {
         return $rows;
     }
 }
+
 ?>
