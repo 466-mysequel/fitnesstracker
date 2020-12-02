@@ -89,19 +89,3 @@ CREATE TABLE food_log (
     FOREIGN KEY (food_id) REFERENCES food(id)
 );
 \! echo " * food_log"
-CREATE VIEW total_food_logs AS
-SELECT user_id,food_id,nutrient_id,servings,date FROM food_log		select t.user_id,
-INNER JOIN macronutrient_content USING (food_id)		       f.name as 'Food',
-GROUP BY user_id,food_id ORDER BY date ASC;		       t.servings as 'servings',
-       SUM(CASE WHEN n.id = 1 THEN mi.amount * t.servings ELSE '0' END) as 'fat',
-       SUM(CASE WHEN n.id = 4 THEN mi.amount * t.servings ELSE '0' END) as 'carbs',
-       SUM(CASE WHEN n.id = 7 THEN mi.amount * t.servings ELSE '0' END) as 'protein',
-       SUM(CASE WHEN n.id = 6 THEN mi.amount * t.servings ELSE '0' END) as 'fiber',
-       t.date as 'Date'
-from  food_log t 
-JOIN macronutrient_content mi ON mi.food_id = t.food_id
-JOIN user u ON u.id = t.user_id 
-JOIN food f ON f.id = t.food_id 
-JOIN nutrient n ON n.id = mi.nutrient_id
-group by t.user_id,t.food_id;
-\! echo " * total_food_logs"
