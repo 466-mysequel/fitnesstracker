@@ -134,6 +134,69 @@ if(isset($_GET['action'])):
                 endforeach;
             endif;
         break;
+?>
+<?php
+        /**
+         * Sort order of a table
+         * 
+         * This function takes a sort variable and returns the url of the sort type.
+         * @return url
+         * Appends to the end of the url.
+         */
+        function sortorder($fieldname) {
+            $sorturl = "&orderBy=".$fieldname."&sort=";
+            $sorttype = "asc";
+
+            if(isset($_GET['orderBy']) && $_GET['orderBy'] == $fieldname){
+                if(isset($_GET['sort']) && $_GET['sort'] == "asc"){
+                    $sorttype = "desc";
+                }
+            }
+            $sorturl .= $sorttype;
+            return $sorturl;
+        } 
+        $orderBy = " ORDER BY date DESC ";
+        if(isset($_GET['orderBy']) && isset($_GET['sort'])){
+            $orderBy = ' ORDER BY '.$_GET['orderBy'].' '.$_GET['sort'];
+        }
+        ?>
+        
+        <?php
+            // HERE WE CHECK USER ID 
+            $user = $db->get_user($_SESSION['user_id']);
+        ?>    
+            <?php $rows = $db->query("select date,food,servings,fat,carbs,protein,fiber from total_food_logs where user_id = ?" . $orderBy, [$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);?>
+            <h2>Your meal history <?php echo $user['username']; ?></h2>
+            <div class="row">                
+                <?php
+                //start of table
+                echo "        <table class=\"table\">\n";
+                echo "            <thead class=\"thead-light\">";
+                echo "              <tr>\n                ";
+                //printing headers
+                ?>
+                <th><a href="foods.php?action=history<?php echo sortorder('date'); ?>" class="sort">Date</a></th>
+                <th><a href="foods.php?action=history<?php echo sortorder('food'); ?>" class="sort">Food</a></th>
+                <th><a href="foods.php?action=history<?php echo sortorder('servings'); ?>" class="sort">Servings Total</a></th>
+                <th><a href="foods.php?action=history<?php echo sortorder('fat'); ?>" class="sort">Total Fat(g)</a></th>
+                <th><a href="foods.php?action=history<?php echo sortorder('carbs'); ?>" class="sort">Total Carbs(g)</a></th>
+                <th><a href="foods.php?action=history<?php echo sortorder('protein'); ?>" class="sort">Total Protein(g)</a></th>
+                <th><a href="foods.php?action=history<?php echo sortorder('fiber'); ?>" class="sort">Total Fiber(g)</a></th>
+                <?php
+                echo "            </thead>";
+                echo "\n            </tr>\n";
+                //printing data
+                foreach ($rows as $row) {
+                    echo "            <tr>\n                ";
+                    foreach ($row as $td) {
+                        echo "<td>$td</td>";
+                    }
+                    echo "\n            </tr>\n";
+                }
+                echo "        </table>\n";
+                ?>
+            </div>   
+<?php   break;
         case 'browse':
             if(isset($_GET['id'])):
                 $food = $db->get_food((int) $_GET['id']);

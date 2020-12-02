@@ -150,27 +150,102 @@ if(isset($_GET['action'])):
      <pre><?php if ($_SERVER['REQUEST_METHOD'] === 'POST') var_dump($_POST); ?></pre>
 <?php   break;
         case 'history':
+            // If URL has a timestamp, print the confirmation section
             $workouts = [];
             if(isset($_GET['timestamp'])) {
                 echo "<h2>Workout added successfully</h2>";
                 $workouts = $db->get_workouts($_SESSION['user_id'], (int)$_GET['timestamp']);
-            } else {
-                echo "<h2>Your workout history</h2>";
-                $workouts = $db->get_workouts($_SESSION['user_id']);
+                $headers = [
+                    'date' => 'Date of workout',
+                    'duration_minutes' => 'Duration (minutes)',
+                    'category' => 'Category',
+                    'activity' => 'Activity',
+                    'intensity' => 'Intensity',
+                    'calories_burned' => 'Calories burned'
+                ];
+                draw_table($workouts, $headers, );
             }
-            $headers = [
-                'date' => 'Date of workout',
-                'duration_minutes' => 'Duration (minutes)',
-                'category' => 'Category',
-                'activity' => 'Activity',
-                'intensity' => 'Intensity',
-                'calories_burned' => 'Calories burned'
-            ];
-            draw_table($workouts, $headers, );
-?>
-        <h1>Your workout history</h1>
-        <div class="row">
-        </div>
+
+        // Diego's table:
+
+        /**
+         * Sort order of a table
+         * 
+         * This function takes a sort variable and returns the url of the sort type.
+         * @return url
+         * Appends to the end of the url.
+         */
+        function sortorder($fieldname) {
+            $sorturl = "&orderBy=".$fieldname."&sort=";
+            $sorttype = "asc";
+
+            if(isset($_GET['orderBy']) && $_GET['orderBy'] == $fieldname){
+                if(isset($_GET['sort']) && $_GET['sort'] == "asc"){
+                    $sorttype = "desc";
+                }
+            }
+            $sorturl .= $sorttype;
+            return $sorturl;
+        } 
+        $orderBy = " ORDER BY date DESC ";
+        if(isset($_GET['orderBy']) && isset($_GET['sort'])){
+            $orderBy = ' ORDER BY '.$_GET['orderBy'].' '.$_GET['sort'];
+        }
+        ?>
+                
+        <?php
+            // HERE WE CHECK USER ID 
+            $user = $db->get_user($_SESSION['user_id']);
+        ?>    
+            <?php $rows = $db->query("select l.date,t.activity,t.intensity,l.duration_seconds as seconds,b.calories_burned as calories from workout_log l join workout_type t ON t.id = l.workout_type_id join workout_calories_burned b on b.date = l.date where l.user_id = ? group by l.date " . $orderBy, [$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);?>
+            <h2>Your workout history <?php echo $user['username']; ?></h2>
+
+            <?php $calories_burned_total = $db->query("select sum(calories_burned) as total, avg(calories_burned) as average from workout_calories_burned where user_id = ?",[$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);?>
+            <?php foreach ($calories_burned_total as $total) { 
+                    $ctr = 0;
+                    foreach($total as $number) {
+                        if ($ctr == 0) {?>
+                            <h4>Total Calories Burned: <?php echo (int)$number;  ?></h4> <?php
+                        } else { ?>
+                            <h4>Average Calories Burned: <?php echo (int)$number;  ?></h4> <?php    
+                        }
+                        $ctr++;
+                  } 
+                   }?>
+            <div class="row">                
+                <?php
+                //start of table
+                echo "        <table class=\"table\">\n";
+                echo "            <thead class=\"thead-light\">";
+                echo "              <tr>\n                ";
+                //printing headers
+                ?>
+                <th><a href="workouts.php?action=history<?php echo sortorder('l.date'); ?>" class="sort">Date</a></th>
+                <th><a href="workouts.php?action=history<?php echo sortorder('t.activity'); ?>" class="sort">Workout Activity</a></th>
+                <th><a href="workouts.php?action=history<?php echo sortorder('t.intensity'); ?>" class="sort">Intensity</a></th>
+                <th><a href="workouts.php?action=history<?php echo sortorder('l.duration_seconds'); ?>" class="sort">Duration</a></th>
+                <th><a href="workouts.php?action=history<?php echo sortorder('b.calories_burned'); ?>" class="sort">Calories Burned</a></th>
+                <?php
+                echo "            </thead>";
+                echo "\n            </tr>\n";
+                //printing data
+                foreach ($rows as $row) {
+                    $ctr = 0;
+                    echo "            <tr>\n                ";
+                    foreach ($row as $td) {
+                        if ($ctr == 3) {
+                            $td = gmdate("H:i:s", (int)$td);
+                            echo "<td>$td</td>";
+                        } else {
+                            echo "<td>$td</td>";
+                        }
+                        $ctr = $ctr + 1;
+                    }
+                    echo "\n            </tr>\n";
+                }
+                echo "        </table>\n";
+                ?>
+            </div>   
 <?php   break;
         case 'browse':
             if(isset($_GET['id'])):
