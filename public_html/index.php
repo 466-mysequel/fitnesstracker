@@ -9,14 +9,8 @@ error_reporting(E_ALL);
 include_once '../src/db.php';
 include_once '../src/library.php';
 
-// Start writing the page
-session_start();
-$page_title = "Fitness Tracker &rsaquo; Home Page";
-include '../templates/header.php';
-$db = new DB();
 
-echo<<<HTML
-<style> 
+$style = <<<CSS
 .signed-out {
   background-image: url('https://images.unsplash.com/photo-1571902943202-507ec2618e8f');
   background-color: #cccccc;
@@ -32,8 +26,14 @@ p {
   color: red;
   text-transform: uppercase;
 }
-</style>
-HTML;
+CSS;
+
+// Start writing the page
+session_start();
+$page_title = "Fitness Tracker &rsaquo; Home Page";
+include '../templates/header.php';
+$db = new DB();
+
 
 
 ?>
