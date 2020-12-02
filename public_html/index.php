@@ -48,18 +48,20 @@ HTML;
             <div class="container">
             <div class="row">
                 <div class="col">
-                <?php $rows=$db->get_latest_workout((int) $_SESSION['user_id']);
-                echo "<h1><b>Your Latest Workout:</b></h1> <br>";
+                <?php $rows=$db->get_latest_meal((int) $_SESSION['user_id']);
+                echo "<h1><b>Your Latest meal:</b></h1> <br>";
+                echo  "<i><p>" . $rows[0]['date'] . "</p></i>";
                 foreach($rows as $row){
-                    echo "<i><p>". $row['date']. "<br>" . $row['category']. "<br>" . $row['activity'] . "</p></i>";
+                    echo "<i><p>". "<br>" . $row['name']. "<br>" . $row['serving_size_friendly'] . "</p></i>";
                 }
                 ?>
                 </div>
                 <div class="col"> 
                 <?php $rows=$db->get_latest_workout((int) $_SESSION['user_id']);
                 echo "<h1><b>Your Latest Workout:</b></h1> <br>";
+                echo  "<i><p>" . $rows[0]['date'] . "</p></i>";
                 foreach($rows as $row){
-                    echo "<i><p>". $row['date']. "<br>" . $row['category']. "<br>" . $row['activity'] . "</p></i>";
+                    echo "<i><p>".  "<br>" . $row['category']. "<br>" . $row['activity'] . "</p></i>";
                 }
             ?>
             </div>

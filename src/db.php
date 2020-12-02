@@ -553,14 +553,31 @@ class DB {
         FROM workout_log l 
         JOIN user u ON u.id = l.user_id 
         JOIN workout_type t ON t.id = l.workout_type_id 
-        WHERE u.id = ? 
+        WHERE u.id = ?
         ORDER BY l.date DESC LIMIT 1";
 
         $rows=$this->query($sql,[$user_id])->fetchAll(PDO::FETCH_ASSOC);
         return $rows;
 
     }
-    
+    /**
+     * To get latest meal from food_log tables
+     * 
+     * @author @HR0102
+     * @param user_id - the user's id 
+     * @return array
+     * @see Project Issue #31
+     */
+    function get_latest_meal(int $user_id){
+        $sql = "SELECT date, name, serving_size_friendly
+        FROM food_log
+        JOIN food on food.id = food_id
+        WHERE date IN (SELECT MAX(date)
+        FROM food_log WHERE user_id = ?)";
+
+        $rows=$this->query($sql,[$user_id])->fetchAll(PDO::FETCH_ASSOC);
+        return $rows;
+    }
 }
 
 ?>
