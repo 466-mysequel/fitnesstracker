@@ -42,9 +42,65 @@ if(isset($_GET['action'])):
         </div>
 <?php   break;
         case 'history': ?>
-        <h1>Your workout history</h1>
-        <div class="row">
-        </div>
+        <?php
+        /**
+         * Sort order of a table
+         * 
+         * This function takes a sort variable and returns the url of the sort type.
+         * @return url
+         * Appends to the end of the url.
+         */
+        function sortorder($fieldname) {
+            $sorturl = "&orderBy=".$fieldname."&sort=";
+            $sorttype = "asc";
+
+            if(isset($_GET['orderBy']) && $_GET['orderBy'] == $fieldname){
+                if(isset($_GET['sort']) && $_GET['sort'] == "asc"){
+                    $sorttype = "desc";
+                }
+            }
+            $sorturl .= $sorttype;
+            return $sorturl;
+        } 
+        $orderBy = " ORDER BY date DESC ";
+        if(isset($_GET['orderBy']) && isset($_GET['sort'])){
+            $orderBy = ' ORDER BY '.$_GET['orderBy'].' '.$_GET['sort'];
+        }
+        ?>
+        
+        <?php
+            // HERE WE CHECK USER ID 
+            $user = $db->get_user($_SESSION['user_id']);
+        ?>    
+            <?php $rows = $db->query("select l.date,t.activity,t.intensity,l.duration_seconds as seconds,b.calories_burned as calories from workout_log l join workout_type t ON t.id = l.workout_type_id join workout_calories_burned b on b.date = l.date where l.user_id = ? group by l.date " . $orderBy, [$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);?>
+            <h2>Your workout history <?php echo $user['username']; ?></h2>
+            <div class="row">                
+                <?php
+                //start of table
+                echo "        <table class=\"table\">\n";
+                echo "            <thead class=\"thead-light\">";
+                echo "              <tr>\n                ";
+                //printing headers
+                ?>
+                <th><a href="workouts.php?action=history<?php echo sortorder('l.date'); ?>" class="sort">Date</a></th>
+                <th><a href="workouts.php?action=history<?php echo sortorder('t.activity'); ?>" class="sort">Workout Activity</a></th>
+                <th><a href="workouts.php?action=history<?php echo sortorder('t.intensity'); ?>" class="sort">Intensity</a></th>
+                <th><a href="workouts.php?action=history<?php echo sortorder('l.duration_seconds'); ?>" class="sort">Duration</a></th>
+                <th><a href="workouts.php?action=history<?php echo sortorder('b.calories_burned'); ?>" class="sort">Calories Burned</a></th>
+                <?php
+                echo "            </thead>";
+                echo "\n            </tr>\n";
+                //printing data
+                foreach ($rows as $row) {
+                    echo "            <tr>\n                ";
+                    foreach ($row as $td) {
+                        echo "<td>$td</td>";
+                    }
+                    echo "\n            </tr>\n";
+                }
+                echo "        </table>\n";
+                ?>
+            </div>   
 <?php   break;
         case 'browse':
             if(isset($_GET['id'])):

@@ -105,7 +105,7 @@ if(isset($_GET['action'])):
             $sorturl .= $sorttype;
             return $sorturl;
         } 
-        $orderBy = " ORDER BY food DESC ";
+        $orderBy = " ORDER BY date DESC ";
         if(isset($_GET['orderBy']) && isset($_GET['sort'])){
             $orderBy = ' ORDER BY '.$_GET['orderBy'].' '.$_GET['sort'];
         }
@@ -115,7 +115,7 @@ if(isset($_GET['action'])):
             // HERE WE CHECK USER ID 
             $user = $db->get_user($_SESSION['user_id']);
         ?>    
-            <?php $rows = $db->query("select food,servings,fat,carbs,protein,fiber from total_food_logs where user_id = ?" . $orderBy, [$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);?>
+            <?php $rows = $db->query("select date,food,servings,fat,carbs,protein,fiber from total_food_logs where user_id = ?" . $orderBy, [$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);?>
             <h2>Your meal history <?php echo $user['username']; ?></h2>
             <div class="row">                
                 <?php
@@ -125,6 +125,7 @@ if(isset($_GET['action'])):
                 echo "              <tr>\n                ";
                 //printing headers
                 ?>
+                <th><a href="foods.php?action=history<?php echo sortorder('date'); ?>" class="sort">Date</a></th>
                 <th><a href="foods.php?action=history<?php echo sortorder('food'); ?>" class="sort">Food</a></th>
                 <th><a href="foods.php?action=history<?php echo sortorder('servings'); ?>" class="sort">Servings Total</a></th>
                 <th><a href="foods.php?action=history<?php echo sortorder('fat'); ?>" class="sort">Total Fat(g)</a></th>
