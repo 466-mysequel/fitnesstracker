@@ -67,13 +67,26 @@ if(isset($_GET['action'])):
             $orderBy = ' ORDER BY '.$_GET['orderBy'].' '.$_GET['sort'];
         }
         ?>
-        
+                
         <?php
             // HERE WE CHECK USER ID 
             $user = $db->get_user($_SESSION['user_id']);
         ?>    
             <?php $rows = $db->query("select l.date,t.activity,t.intensity,l.duration_seconds as seconds,b.calories_burned as calories from workout_log l join workout_type t ON t.id = l.workout_type_id join workout_calories_burned b on b.date = l.date where l.user_id = ? group by l.date " . $orderBy, [$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);?>
             <h2>Your workout history <?php echo $user['username']; ?></h2>
+
+            <?php $calories_burned_total = $db->query("select sum(calories_burned) as total, avg(calories_burned) as average from workout_calories_burned where user_id = ?",[$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);?>
+            <?php foreach ($calories_burned_total as $total) { 
+                    $ctr = 0;
+                    foreach($total as $number) {
+                        if ($ctr == 0) {?>
+                            <h4>Total Calories Burned: <?php echo (int)$number;  ?></h4> <?php
+                        } else { ?>
+                            <h4>Average Calories Burned: <?php echo (int)$number;  ?></h4> <?php    
+                        }
+                        $ctr++;
+                  } 
+                   }?>
             <div class="row">                
                 <?php
                 //start of table
@@ -92,9 +105,16 @@ if(isset($_GET['action'])):
                 echo "\n            </tr>\n";
                 //printing data
                 foreach ($rows as $row) {
+                    $ctr = 0;
                     echo "            <tr>\n                ";
                     foreach ($row as $td) {
-                        echo "<td>$td</td>";
+                        if ($ctr == 3) {
+                            $td = gmdate("H:i:s", (int)$td);
+                            echo "<td>$td</td>";
+                        } else {
+                            echo "<td>$td</td>";
+                        }
+                        $ctr = $ctr + 1;
                     }
                     echo "\n            </tr>\n";
                 }
