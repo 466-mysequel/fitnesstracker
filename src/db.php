@@ -760,5 +760,28 @@ class DB {
         //echo "</div></div></div><br><h1>JSON</h1><pre>" . json_encode($meals, JSON_PRETTY_PRINT) . "</pre><div>";
         return $meals;
     }
+    
+
+    /**
+     * Get a list of workouts
+     * 
+     * @param int user_id The user ID
+     * @param int timestamp If you want to get a single workout
+     * @return array
+     * @example get_workouts(1)
+     */
+    function get_workouts(int $user_id, ?int $timestamp = null): array {
+        $sql = <<<SQL
+        SELECT date, duration_seconds/60 AS duration_minutes, category, activity, intensity, WEIGHT_AT_TIME(user_id, date) * mets_value * duration_seconds/3600 AS calories_burned
+        FROM workout_log
+        INNER JOIN workout_type ON workout_type.id = workout_type_id
+        WHERE user_id = ?
+        SQL;
+        if(is_null($timestamp)) {
+            return $this->query($sql, [$user_id])->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            return $this->query("$sql AND `date` = FROM_UNIXTIME(?)", [$user_id, $timestamp])->fetchAll(PDO::FETCH_ASSOC);
+        }
+    }
 }
 ?>

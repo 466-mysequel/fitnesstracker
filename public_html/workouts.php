@@ -149,7 +149,25 @@ if(isset($_GET['action'])):
         </form>
      <pre><?php if ($_SERVER['REQUEST_METHOD'] === 'POST') var_dump($_POST); ?></pre>
 <?php   break;
-        case 'history': ?>
+        case 'history':
+            $workouts = [];
+            if(isset($_GET['timestamp'])) {
+                echo "<h2>Workout added successfully</h2>";
+                $workouts = $db->get_workouts($_SESSION['user_id'], (int)$_GET['timestamp']);
+            } else {
+                echo "<h2>Your workout history</h2>";
+                $workouts = $db->get_workouts($_SESSION['user_id']);
+            }
+            $headers = [
+                'date' => 'Date of workout',
+                'duration_minutes' => 'Duration (minutes)',
+                'category' => 'Category',
+                'activity' => 'Activity',
+                'intensity' => 'Intensity',
+                'calories_burned' => 'Calories burned'
+            ];
+            draw_table($workouts, $headers, );
+?>
         <h1>Your workout history</h1>
         <div class="row">
         </div>
