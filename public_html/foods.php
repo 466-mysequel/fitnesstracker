@@ -55,7 +55,7 @@ if(isset($_GET['action'])):
         // check food entries and convert entries as needed
         foreach($_POST['unit'] as $key => $value){ 
             if($value == "serving"){
-                $serving = $value;
+                $serving[] = $servings[$key];
             } elseif ($value == "g" || $value == "lb"  || $value == "oz" || $value == "kg"){
                 $food = $db->get_food((int)$foods[$key]);
                 $conv_unit[$key] = convert::mass_to_g((float)$servings[$key],$value);
@@ -79,7 +79,7 @@ if(isset($_GET['action'])):
             }
         }
         
-        $log_food_timestamp = $db->log_food($_SESSION['user_id'], $_POST['food_id'], $serving, $_POST['date'] . ' ' . $_POST['time']);
+        $log_food_timestamp = $db->log_food($_SESSION['user_id'], $_POST['food_id'], (array)$serving, $_POST['date'] . ' ' . $_POST['time']);
         if($log_food_timestamp > 0) {
             redirect("foods.php?action=history&timestamp=" . $log_food_timestamp, "Your food was logged successfully");
         }
@@ -399,11 +399,11 @@ if(isset($_GET['action'])):
             <label for="serving_size_friendly" >Serving Size</label>
             <input type="text" id="serving_size_friendly" name="serving_size_friendly" class="form-control" placeholder="i.e., 1 egg">
             <label for="calories" >Calories Per Serving</label>
-            <input type="number" min="0" id="calories" name="calories_per_serving" class="form-control" placeholder="100">
+            <input type="number" step="0.01"min="0.01" id="calories" name="calories_per_serving" class="form-control" placeholder="100">
             <label for="serving_size_grams" >Serving Size (g)</label>
-            <input type="number" min="0" id="serving_size_grams" name="serving_size_grams" class="form-control" placeholder="50">
+            <input type="number" step="0.01"min="0.01" id="serving_size_grams" name="serving_size_grams" class="form-control" placeholder="50">
             <label for="serving_size_cc" >Serving Size (cc)</label>
-            <input type="number" min="0" id="serving_size_cc" name="serving_size_cc" class="form-control" placeholder="optional">
+            <input type="number" step="0.01"min="0.01" id="serving_size_cc" name="serving_size_cc" class="form-control" placeholder="optional">
         </div>
         <div class="col">    
             <div class="macros">
@@ -440,7 +440,7 @@ if(isset($_GET['action'])):
                     <label for="nutrient_name">Name</label>
                     <input type="text" id="nutrient_name" name="name" class="form-control">
                     <label for="rdv_amount">Recommended Daily Value</label>
-                    <input type="number" min="0" id="rdv_amount" name="rdv_amount" class="form-control" placeholder="0">
+                    <input type="number" step="0.01"min="0.01" id="rdv_amount" name="rdv_amount" class="form-control" placeholder="0">
                     <label for="rdv_unit">Unit</label>
                     <select id="rdv_unit" name="rdv_unit" class="form-control">
                         <option value="g">g</option>
@@ -558,7 +558,7 @@ if(isset($_GET['action'])):
                 }
 
                 // add the rest to macro_html to close it up
-                macro_html = macro_html.concat(`</select><input type="number" min="0" name="macro_g[]" style="width:3em"/>grams <a href="#" class="delete-macro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
+                macro_html = macro_html.concat(`</select><input type="number" step="0.01" min="0.01" name="macro_g[]" style="width:5em"/>grams <a href="#" class="delete-macro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
                 $(macro_wrapper).append(macro_html); //add input box
                 num_macros++; // add to macro counter
             } else {
@@ -582,7 +582,7 @@ if(isset($_GET['action'])):
                 for(var i = 0; i < micro_option_ids.length; i++){
                     micro_html = micro_html.concat(`<option value=${micro_option_ids[i]}>${micro_option_names[i]}</option>`);
                 }   
-                micro_html = micro_html.concat(`</select><input type="number" min="0" name="micro_dv[]" style="width:3em"/>% <a href="#" class="delete-micro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
+                micro_html = micro_html.concat(`</select><input type="number" step="0.01"min="0.01" name="micro_dv[]" style="width:5em"/>% <a href="#" class="delete-micro"><span style="font-size: 1.5em; color: transparent; text-shadow: 0 0 0 red;">&#x24E7;</span></a></div>`);
                 $(micro_wrapper).append(micro_html); //add input box
                 num_micros++;
             } else {
@@ -607,7 +607,7 @@ if(isset($_GET['action'])):
                 }   
                 food_html = food_html.concat(`</select>
                                                 <label for="servings">Amount</label>
-                                                <input id="servings" type="number" min="1" name="servings[]" style="width:3em"/>
+                                                <input id="servings" type="number" step="0.01" min="0.01" name="servings[]" style="width:5em"/>
                                                 <label for="unit">Unit</label>
                                                 <select name="unit[]" id="unit">
                                                     <option value="serving">serving</option>
