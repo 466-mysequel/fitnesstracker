@@ -22,6 +22,7 @@ if(isset($stylesheets)) {
 }
 ?>
     <style>
+
 html {
     position: relative;
     min-height: 100%;
