@@ -304,8 +304,8 @@ if(isset($_GET['action'])):
                         <td class="blank-cell">
                         </td>
                         <th>
-                            Added sugars
-                            <?php echo (isset($macros['Added sugars']) ? $macros['Added sugars']['amount'] : 0 ); ?>g
+                            Sugar
+                            <?php echo (isset($macros['Sugar']) ? $macros['Sugar']['amount'] : 0 ); ?>g
                         </th>
                         <td>
                         </td>

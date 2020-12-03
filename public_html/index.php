@@ -48,21 +48,30 @@ $db = new DB();
                     <h3>Your weight over time</h3>
                     <?php
                     $rows=$db->query("SELECT date,weight_kg FROM weight_log WHERE user_id = ?", [$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);
-                    draw_table($rows);
+                    if(count($rows) > 0) {
+                        draw_table($rows);
+                    } else {
+                        echo "<p class=\"lead\">You have not logged any weight yet. Please add your weight on the <a href=\"account.php\">Acccount page</a>\n";
+                    }
+                    
                     ?>
                 </div>
                 <div class="col-6"> 
 
                   <h4>Net calories per day</h4>
 <?php
-        $net_cals = $db->query("SELECT * FROM net_calories_per_day WHERE user_id = ? ORDER BY date DESC LIMIT 10", [$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);
-        $headers = [
-            'date' => 'Date',
-            'total_calories_in' => 'Cals In',
-            'total_calories_out' => 'Cals Out',
-            'net_calories' => 'Net Cals'
-        ];
-        draw_table($net_cals, $headers, true, 'netCals', 'table table-striped table-sm');
+                    $net_cals = $db->query("SELECT * FROM net_calories_per_day WHERE user_id = ? ORDER BY date DESC LIMIT 10", [$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);
+                    if(count($net_cals) > 0) {
+                        $headers = [
+                            'date' => 'Date',
+                            'total_calories_in' => 'Cals In',
+                            'total_calories_out' => 'Cals Out',
+                            'net_calories' => 'Net Cals'
+                        ];
+                        draw_table($net_cals, $headers, true, 'netCals', 'table table-striped table-sm');
+                    } else {
+                        echo "<p class=\"lead\">You have not logged any activity yet. Please add your <a href=\"foods.php?action=log\">meals</a> and <a href=\"workouts.php?action=log\">workouts.</a>\n";
+                    }
 ?>
 
                 </div>
