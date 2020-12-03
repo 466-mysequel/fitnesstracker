@@ -304,8 +304,8 @@ if(isset($_GET['action'])):
                         <td class="blank-cell">
                         </td>
                         <th>
-                            Added sugars
-                            <?php echo (isset($macros['Added sugars']) ? $macros['Added sugars']['amount'] : 0 ); ?>g
+                            Sugar
+                            <?php echo (isset($macros['Sugar']) ? $macros['Sugar']['amount'] : 0 ); ?>g
                         </th>
                         <td>
                         </td>
@@ -603,14 +603,12 @@ function drawChart() {
                 </pre>
             </div>
             <div class="col-6">
-                <h4>Net calories per day</h4>
+                <h4>Estimated calories consumed per day</h4>
 <?php
-        $net_cals = $db->query("SELECT * FROM net_calories_per_day WHERE user_id = ? ORDER BY date DESC LIMIT 10", [$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);
+        $net_cals = $db->query("SELECT * FROM calories_in_per_day WHERE user_id = ? ORDER BY date DESC LIMIT 10", [$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);
         $headers = [
             'date' => 'Date',
-            'total_calories_in' => 'Cals In',
-            'total_calories_out' => 'Cals Out',
-            'net_calories' => 'Net Cals'
+            'total_calories_in' => 'Calories consumed',
         ];
         draw_table($net_cals, $headers, true, 'netCals', 'table table-striped table-sm');
 ?>

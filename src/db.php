@@ -825,12 +825,11 @@ class DB {
      * @see "Project Issue #31
      */
     function get_latest_workout(int $user_id){
-        $sql = "SELECT t.category,t.activity,u.username,l.date 
-        FROM workout_log l 
-        JOIN user u ON u.id = l.user_id 
-        JOIN workout_type t ON t.id = l.workout_type_id 
-        WHERE u.id = ?
-        ORDER BY l.date DESC LIMIT 1";
+        $sql = "SELECT date as Date, CONCAT(ROUND(duration_seconds/60), ' minutes') AS Duration, category as 'Activity Category', activity as 'Physical Activity', intensity as 'Workout Intensity', ROUND(mets_value * duration_seconds/3600 * WEIGHT_AT_TIME($user_id,date)) AS 'Estimated Calories Burned'      FROM workout_log
+        JOIN user ON user.id = user_id 
+        JOIN workout_type ON workout_type.id = workout_type_id 
+        WHERE user.id = ?
+        ORDER BY date DESC LIMIT 1";
 
         $rows=$this->query($sql,[$user_id])->fetchAll(PDO::FETCH_ASSOC);
         return $rows;
