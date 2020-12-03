@@ -11,30 +11,27 @@ include_once '../src/library.php';
 
 
 $style = <<<CSS
-.signed-out {
-  background-image: url('https://images.unsplash.com/photo-1571902943202-507ec2618e8f');
-  background-color: #cccccc;
-  height: 500px;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  position: relative;
-  background-attachment: fixed;
-}
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
 
-p {
-  color: red;
-  text-transform: uppercase;
-}
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+
 CSS;
 
 // Start writing the page
-session_start();
 $page_title = "Fitness Tracker &rsaquo; Home Page";
 include '../templates/header.php';
 $db = new DB();
-
-
 
 ?>
     <!-- Page Content -->
@@ -43,7 +40,7 @@ $db = new DB();
     $user = $db->get_user($_SESSION['user_id']); 
 
 ?>
-        <main role="main" class="container">
+        <main role="main">
             <h1> Hello <?php echo $user['first_name'] . ' ' . $user['last_name']; ?> </h1>
             <div class="container">
             <div class="row">
@@ -68,13 +65,31 @@ $db = new DB();
             </div>
         </main>
     <?php else: ?>
-        <div class="signed-out">
-            <div class="jumbotron text-center">
-                <h1><?php echo $page_title; ?></h1>
+            <div class="jumbotron">
+                <div class="container">
+                    <h1 class="display-3">Fitness Tracker</h1>
+                    <p class="lead"><b>With Fitness tracker, you can keep track of your weight, diet, and exercise. Start tracking your fitness today!</b></p>
+                    <p><a class="btn btn-primary btn-lg" href="signup.php" role="button">Sign up &raquo;</a></p>
+                </div>
             </div>
-            <main role="main" class="container">
-            <h1 style="color:#007bff">You need to be <a style="color:#eb3434" href="login.php">signed in</a> to view your stats!</h1>
-            </main>
-        </div>
+            <div class="container">
+
+            <div class="row">
+                <div class="col-md-4">
+                    <h2>Track your weight</h2>
+                    <p>Get started by adding your weight. Keep track of your weight as you go.</p>
+                </div>
+                <div class="col-md-4">
+                    <h2>Track your diet</h2>
+                    <p>Log what you eat. Select from foods in our database or add your own.</p>
+                </div>
+                <div class="col-md-4">
+                    <h2>Track your exercise</h2>
+                    <p>Log your physical activity. Choose from activities in our database or add your own.</p>
+                </div>
+            </div>
+            <hr>
+
+        </div> <!-- /container -->
     <?php endif; ?>
 <?php include '../templates/footer.php'; ?>
