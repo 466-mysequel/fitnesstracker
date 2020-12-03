@@ -451,20 +451,20 @@ if(isset($_GET['action'])):
         <div class="col">
             <h2>Create a new food</h2>
             <label for="name" >Name</label>
-            <input type="text" id="name" name="name" class="form-control" placeholder="egg">
+            <input type="text" id="name" name="name" class="form-control" placeholder="Name of the food">
             <label for="type" >Type</label>
             <select id="type" name="type" class="form-control">
                 <option value="solid">Solid</option>
                 <option value="liquid">Liquid</option>
             </select>
             <label for="serving_size_friendly" >Serving Size</label>
-            <input type="text" id="serving_size_friendly" name="serving_size_friendly" class="form-control" placeholder="i.e., 1 egg">
+            <input type="text" id="serving_size_friendly" name="serving_size_friendly" class="form-control" placeholder="i.e., One cup">
             <label for="calories" >Calories Per Serving</label>
-            <input type="number" step="0.01"min="0.01" id="calories" name="calories_per_serving" class="form-control" placeholder="100">
+            <input type="number" step="0.01"min="0.01" id="calories" name="calories_per_serving" class="form-control" placeholder="Calories per serving">
             <label for="serving_size_grams" >Serving Size (g)</label>
-            <input type="number" step="0.01"min="0.01" id="serving_size_grams" name="serving_size_grams" class="form-control" placeholder="50">
+            <input type="number" step="0.01"min="0.01" id="serving_size_grams" name="serving_size_grams" class="form-control" placeholder="Serving size (in grams)">
             <label for="serving_size_cc" >Serving Size (cc)</label>
-            <input type="number" step="0.01"min="0.01" id="serving_size_cc" name="serving_size_cc" class="form-control" placeholder="optional">
+            <input type="number" step="0.01"min="0.01" id="serving_size_cc" name="serving_size_cc" class="form-control" placeholder="Volume in (cc or mL)">
         </div>
         <div class="col">    
             <div class="macros">
