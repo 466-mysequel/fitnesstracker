@@ -674,26 +674,73 @@ function drawChart() {
                 </div>
             </div>
         </form>
-        <h4>Monthly consumption vs recommended amount</h4>
 <?php
-        $sql = <<<SQL
-        SELECT
-            name,
-            CONCAT(ROUND(micro_total_percent/100*rdv_amount/30,2), ' ', rdv_unit) AS avg_micro_mass_per_day,
-            CONCAT(rdv_amount, ' ', rdv_unit) AS recommended_amount,
-            ROUND(micro_total_percent/30) AS percent
-        FROM micro_totals_monthly
-        INNER JOIN nutrient ON nutrient.id = nutrient_id
-        WHERE user_id = ?
-        SQL;
-        $headers = [
-            'name' => 'Micronutrient Name',
-            'avg_micro_mass_per_day' => 'Average daily intake',
-            'recommended_amount' => 'Recommended daily intake',
-            'percent' => '%'
-        ];
-        $rows = $db->query($sql,[$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);
-        draw_table($rows, $headers, true, 'micros', 'table table-striped table-sm');
+
+        switch($summaryperiod) {
+            case 'monthly':
+                echo "                <h4>Monthly micronutrient consumption vs recommended amount</h4>\n";
+                $sql = <<<SQL
+                SELECT
+                    name,
+                    CONCAT(ROUND(micro_total_percent/100*rdv_amount/30,2), ' ', rdv_unit) AS avg_micro_mass_per_day,
+                    CONCAT(rdv_amount, ' ', rdv_unit) AS recommended_amount,
+                    ROUND(micro_total_percent/30) AS percent
+                FROM micro_totals_monthly
+                INNER JOIN nutrient ON nutrient.id = nutrient_id
+                WHERE user_id = ?
+                SQL;
+                $headers = [
+                    'name' => 'Micronutrient Name',
+                    'avg_micro_mass_per_day' => 'Average daily intake',
+                    'recommended_amount' => 'Recommended daily intake',
+                    'percent' => '%'
+                ];
+                $rows = $db->query($sql,[$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);
+                draw_table($rows, $headers, true, 'micros', 'table table-striped table-sm');
+                break;
+            case 'weekly':
+                echo "                <h4>Weekly micronutrient consumption vs recommended amount</h4>\n";
+                $sql = <<<SQL
+                SELECT
+                    name,
+                    CONCAT(ROUND(micro_total_percent/100*rdv_amount/7,2), ' ', rdv_unit) AS avg_micro_mass_per_day,
+                    CONCAT(rdv_amount, ' ', rdv_unit) AS recommended_amount,
+                    ROUND(micro_total_percent/7) AS percent
+                FROM micro_totals_weekly
+                INNER JOIN nutrient ON nutrient.id = nutrient_id
+                WHERE user_id = ?
+                SQL;
+                $headers = [
+                    'name' => 'Micronutrient Name',
+                    'avg_micro_mass_per_day' => 'Average daily intake',
+                    'recommended_amount' => 'Recommended daily intake',
+                    'percent' => '%'
+                ];
+                $rows = $db->query($sql,[$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);
+                draw_table($rows, $headers, true, 'micros', 'table table-striped table-sm');
+                break;
+            case 'today':
+                echo "                <h4>Today's micronutrient consumption vs recommended amount</h4>\n";
+                $sql = <<<SQL
+                SELECT
+                    name,
+                    CONCAT(ROUND(micro_total_percent/100*rdv_amount,2) , ' ', rdv_unit) AS mass_today,
+                    CONCAT(rdv_amount, ' ', rdv_unit) AS recommended_amount,
+                    micro_total_percent AS percent
+                FROM micro_totals_today
+                INNER JOIN nutrient ON nutrient.id = nutrient_id
+                WHERE user_id = ?
+                SQL;
+                $headers = [
+                    'name' => 'Micronutrient Name',
+                    'mass_today' => 'Today\'s daily intake',
+                    'recommended_amount' => 'Recommended daily intake',
+                    'percent' => '%'
+                ];
+                $rows = $db->query($sql,[$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);
+                draw_table($rows, $headers, true, 'micros', 'table table-striped table-sm');
+                break;
+        }
 ?>
 
 <?php endif; ?>
