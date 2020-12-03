@@ -86,7 +86,7 @@ AND DATE(date) = CURDATE()
 GROUP BY user_id,nutrient_id;
 \! echo " * macro_totals_today"
 # View: Food Totals
-CREATE VIEW total_food_logs AS
+CREATE VIEW summary_food_logs AS
 select t.user_id,
        f.name as 'Food',
        t.servings as 'servings',
@@ -101,6 +101,23 @@ JOIN user u ON u.id = t.user_id
 JOIN food f ON f.id = t.food_id 
 JOIN nutrient n ON n.id = mi.nutrient_id
 group by t.user_id,t.food_id;
+\! echo " * food_logs"
+# View: Food Totals
+CREATE VIEW total_food_logs AS
+select t.user_id,
+       f.name as 'Food',
+       t.servings as 'servings',
+       MAX(CASE WHEN n.id = 1 THEN mi.amount * t.servings ELSE '0' END) as 'fat',
+       MAX(CASE WHEN n.id = 4 THEN mi.amount * t.servings ELSE '0' END) as 'carbs',
+       MAX(CASE WHEN n.id = 7 THEN mi.amount * t.servings ELSE '0' END) as 'protein',
+       MAX(CASE WHEN n.id = 6 THEN mi.amount * t.servings ELSE '0' END) as 'fiber',
+       t.date as 'Date'
+from  food_log t 
+JOIN macronutrient_content mi ON mi.food_id = t.food_id
+JOIN user u ON u.id = t.user_id 
+JOIN food f ON f.id = t.food_id 
+JOIN nutrient n ON n.id = mi.nutrient_id
+group by t.user_id,t.food_id,t.date;
 \! echo " * total_food_logs"
 # View: Macronutrients
 CREATE VIEW macronutrients AS

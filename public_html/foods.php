@@ -125,13 +125,6 @@ if(isset($_GET['action'])):
                 foreach($meals as $meal):
                     draw_table($meal['foods'], ['name' => 'Food', 'calories' => 'Calories']);
                 endforeach;
-            else:
-                echo "        <h3 class=\"mt-3\">Your logged meals</h3>\n";
-                $meals = $db->get_meals((int)$_SESSION['user_id']);
-                foreach($meals as $meal):
-                    echo "\n            <h5 class=\"mt-3\"><a href=\"?action=history&timestamp=" . $meal['unixtime'] . "\">". date('h:i:s A l, jS \of F Y', $meal['unixtime']) . "</a></h3>\n";
-                    draw_table($meal['foods'], ['name' => 'Food', 'calories' => 'Calories']);
-                endforeach;
             endif;
 
         /**
@@ -194,7 +187,15 @@ if(isset($_GET['action'])):
                 echo "        </table>\n";
                 ?>
             </div>   
-<?php   break;
+<?php
+            echo "        <h3 class=\"mt-3\">Your logged meals</h3>\n";
+            $meals = $db->get_meals((int)$_SESSION['user_id']);
+            foreach($meals as $meal):
+                echo "\n            <h5 class=\"mt-3\"><a href=\"?action=history&timestamp=" . $meal['unixtime'] . "\">". date('h:i:s A l, jS \of F Y', $meal['unixtime']) . "</a></h3>\n";
+                draw_table($meal['foods'], ['name' => 'Food', 'calories' => 'Calories']);
+            endforeach;
+
+break;
         case 'browse':
             if(isset($_GET['id'])):
                 $food = $db->get_food((int) $_GET['id']);
