@@ -11,7 +11,7 @@ include_once '../src/library.php';
 
 require_signed_in();
 $db = new DB();
-if(isset($_POST['intensity']) && !empty($_POST['intensity'])) {
+if(isset($_POST['intensity']) && !empty($_POST['intensity']) && isset($_POST['duration']) && !empty($_POST['duration']) && isset($_POST['date']) && !empty($_POST['date'])  && !empty($_POST['duration']) && isset($_POST['time']) && !empty($_POST['time'])) {
     $timestamp = $db->log_workout($_SESSION['user_id'], (int) $_POST['intensity'], 60 * $_POST['duration'], $_POST['date'] . ' ' . $_POST['time']);
     if($timestamp > 0) {
         redirect("workouts.php?action=history&timestamp=$timestamp", "Workout activity added successfully.");
@@ -69,15 +69,7 @@ if(isset($_GET['action'])):
                 <div class="col-md-12">
                     <div class="input-group input-group-lg">
 <?php
-            if(isset($_POST['intensity']) && !empty($_POST['intensity'])):
-                $timestamp = $db->log_workout($_SESSION['user_id'], (int) $_POST['intensity'], 60 * $_POST['duration'], $_POST['date'] . ' ' . $_POST['time']);
-                if($timestamp > 0) {
-                    redirect("workouts.php?action=history&timestamp=$timestamp", "Workout activity added successfully.");
-                }
-
-?>
-<?php
-            elseif(isset($_POST['activity']) && !empty($_POST['activity'])):
+            if(isset($_POST['activity']) && !empty($_POST['activity'])):
                 $activities = $db->query("SELECT id,intensity FROM workout_type WHERE activity = ? GROUP BY id", [$_POST['activity']])->fetchAll(PDO::FETCH_ASSOC);?>
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="intensity">intensity</span>
