@@ -164,7 +164,6 @@ if(isset($_GET['action'])):
                 </div>
             </div>
         </form>
-     <pre><?php if ($_SERVER['REQUEST_METHOD'] === 'POST') var_dump($_POST); ?></pre>
 <?php   break;
         case 'history':
             // If URL has a timestamp, print the confirmation section
