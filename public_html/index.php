@@ -45,11 +45,11 @@ $db = new DB();
             <h1>Hello <?php echo $user['first_name'] . ' ' . $user['last_name']; ?> </h1>
             <div class="row">
                 <div class="col-4">
-                    <h3>Your weight over time</h3>
+                    <h4>Your weight over time</h4>
                     <?php
                     $rows=$db->query("SELECT date,weight_kg FROM weight_log WHERE user_id = ?", [$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);
                     if(count($rows) > 0) {
-                        draw_table($rows);
+                        draw_table($rows, ['date' => 'Date', 'weight_kg' => 'Weight (kg)'],false,'weights','table table-striped table-sm');
                     } else {
                         echo "<p class=\"lead\">You have not logged any weight yet. Please add your weight on the <a href=\"account.php\">Acccount page</a>\n";
                     }
@@ -68,7 +68,7 @@ $db = new DB();
                             'total_calories_out' => 'Cals Out',
                             'net_calories' => 'Net Cals'
                         ];
-                        draw_table($net_cals, $headers, true, 'netCals', 'table table-striped table-sm');
+                        draw_table($net_cals, $headers, false, 'netCals', 'table table-striped table-sm');
                     } else {
                         echo "<p class=\"lead\">You have not logged any activity yet. Please add your <a href=\"foods.php?action=log\">meals</a> and <a href=\"workouts.php?action=log\">workouts.</a>\n";
                     }
