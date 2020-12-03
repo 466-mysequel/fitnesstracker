@@ -44,17 +44,27 @@ $db = new DB();
             <div class="container">
             <h1>Hello <?php echo $user['first_name'] . ' ' . $user['last_name']; ?> </h1>
             <div class="row">
-                <div class="col">
-                <?php $rows=$db->get_latest_meal((int) $_SESSION['user_id']);
-                echo "<h3>Your Latest meal:</h3> <br>";
-                echo  "<i><p>" . $rows[0]['date'] . "</p></i>";
-                foreach($rows as $row){
-                    echo "<i><p>". "<br>" . $row['name']. "<br>" . $row['serving_size_friendly'] . "</p></i>";
-                }
-                ?>
+                <div class="col-4">
+                    <h3>Your weight over time</h3>
+                    <?php
+                    $rows=$db->query("SELECT date,weight_kg FROM weight_log WHERE user_id = ?", [$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);
+                    draw_table($rows);
+                    ?>
                 </div>
-                <div class="col"> 
-                    <h3>Placeholder</h3>
+                <div class="col-6"> 
+
+                  <h4>Net calories per day</h4>
+<?php
+        $net_cals = $db->query("SELECT * FROM net_calories_per_day WHERE user_id = ? ORDER BY date DESC LIMIT 10", [$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);
+        $headers = [
+            'date' => 'Date',
+            'total_calories_in' => 'Cals In',
+            'total_calories_out' => 'Cals Out',
+            'net_calories' => 'Net Cals'
+        ];
+        draw_table($net_cals, $headers, true, 'netCals', 'table table-striped table-sm');
+?>
+
                 </div>
             </div>
         </main>

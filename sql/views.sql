@@ -19,7 +19,7 @@ DELIMITER ;
 \! echo "Creating views..."
 # View: Calories in per day
 CREATE VIEW calories_in_per_day AS
-SELECT DATE(date) AS date, user_id, SUM(calories_per_serving * servings) AS total_calories_in
+SELECT DATE(date) AS date, user_id, CAST(ROUND(SUM(calories_per_serving * servings)) AS INT) AS total_calories_in
 FROM food_log
 INNER JOIN food ON food.id = food_id
 GROUP BY DATE(food_log.date), user_id;
