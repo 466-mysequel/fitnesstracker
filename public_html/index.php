@@ -41,12 +41,12 @@ $db = new DB();
 
 ?>
         <main role="main">
-            <h1> Hello <?php echo $user['first_name'] . ' ' . $user['last_name']; ?> </h1>
             <div class="container">
+            <h1>Hello <?php echo $user['first_name'] . ' ' . $user['last_name']; ?> </h1>
             <div class="row">
                 <div class="col">
                 <?php $rows=$db->get_latest_meal((int) $_SESSION['user_id']);
-                echo "<h1><b>Your Latest meal:</b></h1> <br>";
+                echo "<h3>Your Latest meal:</h3> <br>";
                 echo  "<i><p>" . $rows[0]['date'] . "</p></i>";
                 foreach($rows as $row){
                     echo "<i><p>". "<br>" . $row['name']. "<br>" . $row['serving_size_friendly'] . "</p></i>";
@@ -54,14 +54,8 @@ $db = new DB();
                 ?>
                 </div>
                 <div class="col"> 
-                <?php $rows=$db->get_latest_workout((int) $_SESSION['user_id']);
-                echo "<h1><b>Your Latest Workout:</b></h1> <br>";
-                echo  "<i><p>" . $rows[0]['date'] . "</p></i>";
-                foreach($rows as $row){
-                    echo "<i><p>".  "<br>" . $row['category']. "<br>" . $row['activity'] . "</p></i>";
-                }
-            ?>
-            </div>
+                    <h3>Placeholder</h3>
+                </div>
             </div>
         </main>
     <?php else: ?>

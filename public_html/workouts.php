@@ -20,6 +20,23 @@ if(isset($_POST['intensity']) && !empty($_POST['intensity'])) {
 
 // Start writing the page
 $page_title = "Workouts";
+$style = <<<CSS
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+CSS;
 include '../templates/header.php';
 ?>
 
@@ -492,8 +509,20 @@ $(document).ready(function(){
 <?php else: ?>
         <div class="row">
             <div class="col-6">
-                <div style="text-align:center;line-height:4em;width:100%;height:8em;margin:12px 12px 12px 12px;font-size:2em;background-color:#666666">Your last workout</div>
-
+            <?php
+                $rows=$db->get_latest_workout((int) $_SESSION['user_id']);
+                echo <<<HTML
+                <h3>Your Latest Workout:</h3>
+                <table class="workout">
+                    <tr>
+                HTML;
+                foreach($rows as $row){
+                    foreach($row as $key => $value)
+                        echo "<tr><th>$key</th><td>$value</td></tr>\n";
+                    //echo "<i><p>".  "<br>" . $row['category']. "<br>" . $row['activity'] . "</p></i>";
+                }
+                echo "</table>"
+                ?>
             </div>
             <div class="col-6">
                 <h1>Lorem ipsum dolar sil imet</h1>
