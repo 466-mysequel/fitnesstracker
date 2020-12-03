@@ -674,6 +674,27 @@ function drawChart() {
                 </div>
             </div>
         </form>
+        <h4>Monthly consumption vs recommended amount</h4>
+<?php
+        $sql = <<<SQL
+        SELECT
+            name,
+            CONCAT(ROUND(micro_total_percent/100*rdv_amount/30,2), ' ', rdv_unit) AS avg_micro_mass_per_day,
+            CONCAT(rdv_amount, ' ', rdv_unit) AS recommended_amount,
+            ROUND(micro_total_percent/30) AS percent
+        FROM micro_totals_monthly
+        INNER JOIN nutrient ON nutrient.id = nutrient_id
+        WHERE user_id = ?
+        SQL;
+        $headers = [
+            'name' => 'Micronutrient Name',
+            'avg_micro_mass_per_day' => 'Average daily intake',
+            'recommended_amount' => 'Recommended daily intake',
+            'percent' => '%'
+        ];
+        $rows = $db->query($sql,[$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);
+        draw_table($rows, $headers, true, 'micros', 'table table-striped table-sm');
+?>
 
 <?php endif; ?>
     </main>
