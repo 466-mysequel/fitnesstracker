@@ -499,6 +499,9 @@ $(document).ready(function(){
     endswitch; ?>
 <?php else: ?>
         <div class="row">
+            <h2>Your workouts summary</h2>
+        </div>
+        <div class="row">
             <div class="col-6">
             <?php
                 $rows=$db->get_latest_workout((int) $_SESSION['user_id']);
