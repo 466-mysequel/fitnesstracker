@@ -125,13 +125,6 @@ if(isset($_GET['action'])):
                 foreach($meals as $meal):
                     draw_table($meal['foods'], ['name' => 'Food', 'calories' => 'Calories']);
                 endforeach;
-            else:
-                echo "        <h3 class=\"mt-3\">Your logged meals</h3>\n";
-                $meals = $db->get_meals((int)$_SESSION['user_id']);
-                foreach($meals as $meal):
-                    echo "\n            <h5 class=\"mt-3\"><a href=\"?action=history&timestamp=" . $meal['unixtime'] . "\">". date('h:i:s A l, jS \of F Y', $meal['unixtime']) . "</a></h3>\n";
-                    draw_table($meal['foods'], ['name' => 'Food', 'calories' => 'Calories']);
-                endforeach;
             endif;
 
         /**
@@ -194,7 +187,15 @@ if(isset($_GET['action'])):
                 echo "        </table>\n";
                 ?>
             </div>   
-<?php   break;
+<?php
+            echo "        <h3 class=\"mt-3\">Your logged meals</h3>\n";
+            $meals = $db->get_meals((int)$_SESSION['user_id']);
+            foreach($meals as $meal):
+                echo "\n            <h5 class=\"mt-3\"><a href=\"?action=history&timestamp=" . $meal['unixtime'] . "\">". date('h:i:s A l, jS \of F Y', $meal['unixtime']) . "</a></h3>\n";
+                draw_table($meal['foods'], ['name' => 'Food', 'calories' => 'Calories']);
+            endforeach;
+
+break;
         case 'browse':
             if(isset($_GET['id'])):
                 $food = $db->get_food((int) $_GET['id']);
@@ -451,20 +452,20 @@ if(isset($_GET['action'])):
         <div class="col">
             <h2>Create a new food</h2>
             <label for="name" >Name</label>
-            <input type="text" id="name" name="name" class="form-control" placeholder="egg">
+            <input type="text" id="name" name="name" class="form-control" placeholder="Name of the food">
             <label for="type" >Type</label>
             <select id="type" name="type" class="form-control">
                 <option value="solid">Solid</option>
                 <option value="liquid">Liquid</option>
             </select>
             <label for="serving_size_friendly" >Serving Size</label>
-            <input type="text" id="serving_size_friendly" name="serving_size_friendly" class="form-control" placeholder="i.e., 1 egg">
+            <input type="text" id="serving_size_friendly" name="serving_size_friendly" class="form-control" placeholder="i.e., One cup">
             <label for="calories" >Calories Per Serving</label>
-            <input type="number" step="0.01"min="0.01" id="calories" name="calories_per_serving" class="form-control" placeholder="100">
+            <input type="number" step="0.01"min="0.01" id="calories" name="calories_per_serving" class="form-control" placeholder="Calories per serving">
             <label for="serving_size_grams" >Serving Size (g)</label>
-            <input type="number" step="0.01"min="0.01" id="serving_size_grams" name="serving_size_grams" class="form-control" placeholder="50">
+            <input type="number" step="0.01"min="0.01" id="serving_size_grams" name="serving_size_grams" class="form-control" placeholder="Serving size (in grams)">
             <label for="serving_size_cc" >Serving Size (cc)</label>
-            <input type="number" step="0.01"min="0.01" id="serving_size_cc" name="serving_size_cc" class="form-control" placeholder="optional">
+            <input type="number" step="0.01"min="0.01" id="serving_size_cc" name="serving_size_cc" class="form-control" placeholder="Volume in (cc or mL)">
         </div>
         <div class="col">    
             <div class="macros">
@@ -673,6 +674,27 @@ function drawChart() {
                 </div>
             </div>
         </form>
+        <h4>Monthly consumption vs recommended amount</h4>
+<?php
+        $sql = <<<SQL
+        SELECT
+            name,
+            CONCAT(ROUND(micro_total_percent/100*rdv_amount/30,2), ' ', rdv_unit) AS avg_micro_mass_per_day,
+            CONCAT(rdv_amount, ' ', rdv_unit) AS recommended_amount,
+            ROUND(micro_total_percent/30) AS percent
+        FROM micro_totals_monthly
+        INNER JOIN nutrient ON nutrient.id = nutrient_id
+        WHERE user_id = ?
+        SQL;
+        $headers = [
+            'name' => 'Micronutrient Name',
+            'avg_micro_mass_per_day' => 'Average daily intake',
+            'recommended_amount' => 'Recommended daily intake',
+            'percent' => '%'
+        ];
+        $rows = $db->query($sql,[$_SESSION['user_id']])->fetchAll(PDO::FETCH_ASSOC);
+        draw_table($rows, $headers, true, 'micros', 'table table-striped table-sm');
+?>
 
 <?php endif; ?>
     </main>
