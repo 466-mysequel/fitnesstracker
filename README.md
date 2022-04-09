@@ -1,4 +1,11 @@
 # CSCI 466 Group Project - Fitness Tracker
+
+## Demo
+
+🌐 View on the web at [fitnesstracker.zgjs.app](https://fitnesstracker.zgjs.app/)
+
+https://user-images.githubusercontent.com/59938457/162585142-10fe747f-9a17-4ab1-b6d7-4d816f5f62ab.mp4
+
 ## The Goal
 You are being employed by a company that offers a fitness tracking service. They are working on a phone app that will allow the user to track what they eat, as well as when/how they wor kout. Another employee will be designing the user interface, but you are responsible for designingthe database. Design an ER diagram to fulfill this goal, making sure to meet all of the requirements. All entities must have an appropriate identifier specified. If a surrogate key is used, explain why a natural key was not appropriate. In the interests of saving space, attributes that are not part of an identifier may be omitted from the diagram, but they should be included and explained in that portion of your submission.
 
@@ -149,9 +156,6 @@ servings | positive numbers | how many servings of each food
 **From the latest commit using git:**
 
 `git clone https://github.com/466-mysequel/fitnesstracker --depth 1`
-
-## Demo
-[Demo](#)
 
 ## Sources/Attributions
 
